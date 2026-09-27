@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><base target="_top">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>
+:root{
+ --nav:#09263f;--nav2:#0d3553;--primary:#1769d1;--primary2:#0b57d0;
+ --bg:#f5f7fa;--card:#fff;--ink:#142235;--muted:#728096;--line:#e7ebf0;
+ --green:#1e9e6a;--yellow:#e7a52a;--red:#d94b57;--cyan:#28a9c7;
+ --shadow:0 8px 30px rgba(17,39,68,.065);--r:15px;
+}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}
+button,select,input{font:inherit}.app{min-height:100vh;display:flex}
+.side{position:fixed;inset:0 auto 0 0;width:240px;background:linear-gradient(180deg,var(--nav),#061c30);color:#fff;z-index:50;display:flex;flex-direction:column}
+.logoarea{padding:20px 17px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:10px;align-items:center}
+.logo{width:40px;height:40px;border-radius:10px;background:#ffd62e;display:grid;place-items:center;color:#12395b;font-weight:900;font-size:21px}
+.logoarea b{font-size:13px}.logoarea small{display:block;font-size:9px;color:#b7c7d8;margin-top:3px}
+.nav{padding:14px 10px;overflow:auto}.nav button{width:100%;background:transparent;color:#c9d9e8;border:0;text-align:left;padding:11px 12px;border-radius:9px;margin-bottom:3px;cursor:pointer;font-size:12px;font-weight:600}.nav button.active{background:#146bd0;color:#fff;box-shadow:0 5px 16px rgba(0,0,0,.15)}
+.nav i{font-style:normal;width:24px;display:inline-block;text-align:center}.user{margin-top:auto;padding:14px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:9px;align-items:center}.avatar{width:34px;height:34px;border-radius:50%;background:#315571;display:grid;place-items:center}.user b{font-size:10px}.user small{font-size:8px;color:#a9bac9;display:block;margin-top:3px}
+.main{margin-left:240px;flex:1;min-width:0}.top{height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:0 28px;position:sticky;top:0;z-index:30}.top h1{font-size:19px;margin:0}.top p{font-size:10px;color:var(--muted);margin:5px 0 0}.right{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:10px}.bell{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;background:#fff}
+.content{padding:21px 26px 40px;max-width:1500px;margin:auto}
+.hero{background:linear-gradient(120deg,#0c3555,#1769d1);color:#fff;border-radius:17px;padding:22px 24px;margin-bottom:17px;box-shadow:0 12px 35px rgba(13,61,102,.15);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;right:-100px;top:-160px;background:rgba(255,255,255,.08)}
+.hero .eyebrow{font-size:9px;letter-spacing:1.5px;opacity:.75;text-transform:uppercase}.hero h2{font-size:24px;margin:7px 0 3px}.hero p{font-size:11px;opacity:.82;margin:0}.hero .updated{position:absolute;right:22px;bottom:18px;font-size:9px;opacity:.7}
+.filters{background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:11px;display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px}.field{flex:1;min-width:145px}.field label{font-size:8px;font-weight:800;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase}.field select{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:11px;color:var(--ink)}.refresh{width:42px;border:0;background:var(--primary2);color:#fff;border-radius:8px;cursor:pointer;margin-top:14px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:15px;box-shadow:var(--shadow);min-height:105px}.kpi .icon{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;float:left;margin-right:9px;font-size:18px}.blue{background:#e9f2ff}.green{background:#e4f7ee}.yellow{background:#fff4d9}.red{background:#ffe7e9}.cyan{background:#e5f8fb}.kpi .lbl{font-size:8px;font-weight:800;color:var(--muted);text-transform:uppercase;padding-top:3px}.kpi .val{font-size:23px;font-weight:900;margin-top:5px}.kpi .sub{font-size:8px;color:var(--muted);margin-top:4px;clear:both}
+.grid{display:grid;grid-template-columns:1.4fr .8fr;gap:15px}.panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:15px}.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}.head h3{font-size:12px;margin:0}.head span{font-size:9px;color:var(--muted)}
+.chart{height:245px;display:flex;align-items:stretch;gap:7px;border-bottom:1px solid var(--line);padding:10px 3px 0}.monthcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0}.stackwrap{height:195px;width:100%;max-width:42px;display:flex;align-items:flex-end;gap:2px}.bar{flex:1;border-radius:4px 4px 0 0;min-height:2px}.done{background:#2aaa76}.proc{background:#f0b12b}.pend{background:#df5962}.monthcol small{font-size:8px;color:var(--muted);margin-top:6px}.legend{display:flex;gap:13px;font-size:8px;color:var(--muted);margin-top:9px}.legend b{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:4px}
+.donutrow{display:flex;align-items:center;gap:20px;min-height:210px}.donut{width:145px;height:145px;border-radius:50%;position:relative;flex:none}.donut:after{content:"";position:absolute;inset:32px;background:#fff;border-radius:50%}.dc{position:absolute;inset:0;display:grid;place-items:center;z-index:2;text-align:center;font-size:21px;font-weight:900}.dc small{font-size:8px;color:var(--muted);display:block;font-weight:600}.srow{font-size:10px;margin:10px 0}.srow b{float:right}.miniDot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+.progress{height:9px;background:#edf1f5;border-radius:20px;overflow:hidden;margin:7px 0}.progress span{height:100%;display:block;background:var(--green);border-radius:20px}.muted{font-size:9px;color:var(--muted)}
+.business .metric{display:flex;justify-content:space-between;font-size:10px;margin:9px 0}.business .metric strong{font-size:12px}.business .track{height:12px;background:#edf1f5;border-radius:20px;overflow:hidden}.business .track span{display:block;height:100%;background:linear-gradient(90deg,#1b8c68,#2ab47c);border-radius:20px}
+.notice{padding:9px 10px;background:#f7faff;border-left:3px solid var(--primary);border-radius:5px;margin-bottom:8px}.notice b{font-size:10px}.notice small{display:block;color:var(--muted);font-size:8px;line-height:1.5;margin-top:3px}
+table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{background:#f8fafc;color:#6d7c90;font-size:8px;text-transform:uppercase}.badge{display:inline-block;padding:4px 7px;border-radius:20px;font-size:7px;font-weight:800}.bg{background:#e5f7ef;color:#13734f}.by{background:#fff2d3;color:#9a6700}.br{background:#ffe6e9;color:#bd303b}.bb{background:#e7f0ff;color:#18579d}
+.mobile{display:none}.moduleHead{display:flex;gap:10px;align-items:center;margin-bottom:14px}.mi{width:42px;height:42px;background:#e9f2ff;border-radius:10px;display:grid;place-items:center;font-size:20px}.moduleHead h2{font-size:17px;margin:0}.moduleHead p{font-size:9px;color:var(--muted);margin:3px 0}.actions{margin-left:auto}.btn{border:0;background:var(--primary2);color:#fff;border-radius:8px;padding:8px 11px;font-size:9px;font-weight:800;cursor:pointer}.btn.alt{background:#eef3f8;color:#23415e}
+.empty{text-align:center;padding:25px;color:var(--muted);font-size:10px}.toast{position:fixed;right:18px;bottom:18px;background:#102a43;color:#fff;padding:10px 14px;border-radius:8px;z-index:100;font-size:10px}.hidden{display:none}
+@media(max-width:1100px){.side{width:210px}.main{margin-left:210px}.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:720px){.side{transform:translateX(-100%);transition:.25s;width:245px}.side.open{transform:translateX(0)}.main{margin-left:0}.mobile{display:grid;place-items:center;width:35px;height:35px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}.top{height:60px;padding:0 12px}.content{padding:12px}.hero{padding:18px}.hero h2{font-size:20px}.hero .updated{position:static;margin-top:9px}.filters{padding:9px}.field{min-width:calc(50% - 5px)}.kpis{grid-template-columns:repeat(2,1fr);gap:9px}.kpi{padding:11px;min-height:88px}.kpi .val{font-size:20px}.kpi .icon{float:none;margin-bottom:4px}.grid{display:block}.chart{height:190px}.stackwrap{height:145px}.donutrow{min-height:170px}.donut{width:120px;height:120px}.donut:after{inset:27px}.actions{display:none}.right .date{display:none}}
+@media(max-width:760px){.trend-chart{display:block!important;position:relative!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;white-space:nowrap!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important}.trend-chart .trend-col{display:inline-flex!important;vertical-align:bottom!important;flex:none!important;width:74px!important;min-width:74px!important;margin-right:9px!important}}
+@media(max-width:430px){.field{min-width:100%}.kpis{grid-template-columns:repeat(2,1fr)}.kpi .lbl{font-size:7px}.kpi .sub{font-size:7px}.donutrow{gap:10px}.donut{width:105px;height:105px}.donut:after{inset:24px}}
+
+/* ===== Data Pengusahaan: hanya berlaku pada menu Pengusahaan ===== */
+.pe-title{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(120deg,#09263f,#1769d1);color:#fff;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 10px 28px rgba(13,61,102,.13)}
+.pe-title .moduleHead h2{color:#fff}.pe-title .moduleHead p{color:#d8e7f5}.pe-period{text-align:right;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18);padding:8px 12px;border-radius:10px;min-width:140px}.pe-period span{display:block;font-size:8px;opacity:.7;text-transform:uppercase}.pe-period b{display:block;font-size:11px;margin-top:3px}
+.pe-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}.pe-kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px;box-shadow:var(--shadow);display:flex;gap:10px;min-height:92px}.pe-icon{width:38px;height:38px;border-radius:10px;background:#eaf2ff;display:grid;place-items:center;font-size:16px;flex:none}.pe-kpi small{display:block;color:var(--muted);font-size:8px;font-weight:800;text-transform:uppercase}.pe-kpi strong{display:block;font-size:17px;margin-top:5px;line-height:1.1}.pe-kpi em{display:block;color:var(--muted);font-size:7px;font-style:normal;margin-top:5px}
+.pe-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.pe-panel{min-width:0}.pe-chart{height:235px;display:flex;gap:5px;align-items:stretch;border-bottom:1px solid var(--line);padding:10px 4px 0}.pe-col{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}.pe-bar-wrap{height:170px;width:100%;max-width:38px;display:flex;align-items:flex-end}.pe-bar{width:100%;background:linear-gradient(180deg,#2c88e9,#1769d1);border-radius:5px 5px 0 0;min-height:3px}.pe-col small{font-size:7px;color:var(--muted);margin-top:5px}.pe-val{font-size:6px;color:#58708a;margin-bottom:3px;white-space:nowrap}.pe-foot{display:flex;justify-content:space-between;margin-top:9px;font-size:8px;color:var(--muted)}.pe-foot b{color:var(--ink)}
+.pe-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pe-summary>div{padding:12px;border-radius:10px;background:#f7f9fc;border:1px solid #edf1f5}.pe-summary small{display:block;color:var(--muted);font-size:8px}.pe-summary strong{display:block;font-size:14px;margin-top:5px}
+.pe-bars{max-height:245px;overflow:auto;padding-right:3px}.pe-bar-row{margin:10px 0}.pe-bar-row>div:first-child{display:flex;justify-content:space-between;gap:10px;font-size:9px}.pe-bar-row>div:first-child span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pe-bar-row b{font-size:9px}.pe-track{height:8px;background:#edf1f5;border-radius:20px;overflow:hidden;margin-top:5px}.pe-track i{display:block;height:100%;background:linear-gradient(90deg,#1769d1,#35a1ef);border-radius:20px}
+.pe-asset-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.pe-mini{background:#f7f9fc;border:1px solid #edf1f5;border-radius:10px;padding:12px}.pe-mini span{display:block;font-size:8px;color:var(--muted)}.pe-mini b{display:block;font-size:15px;margin-top:5px}
+@media(max-width:1100px){.pe-kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:720px){.pe-title{align-items:flex-start;gap:8px}.pe-period{display:none}.pe-kpis{grid-template-columns:repeat(2,1fr)}.pe-grid{grid-template-columns:1fr}.pe-chart{height:200px}.pe-bar-wrap{height:140px}.pe-kpi strong{font-size:15px}.pe-summary{grid-template-columns:1fr 1fr}}
+@media(max-width:430px){.pe-kpis{grid-template-columns:1fr 1fr}.pe-kpi{padding:10px}.pe-icon{width:32px;height:32px}.pe-kpi strong{font-size:13px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side" id="side">
+ <div class="logoarea"><div class="logo">⚡</div><div><b>PLN ULP EMPANG</b><small>PLN UP3 SUMBAWA</small></div></div>
+ <nav class="nav" id="nav"></nav>
+ <div class="user"><div class="avatar">👤</div><div><b id="uName">Pengguna</b><small id="uRole">VIEWER</small></div></div>
+</aside>
+<main class="main">
+ <header class="top">
+  <div style="display:flex;gap:9px;align-items:center"><button class="mobile" onclick="toggleSide()">☰</button><div><h1 id="title">Executive Dashboard</h1><p id="sub">PLN ULP Empang • PLN UP3 Sumbawa</p></div></div>
+  <div class="right"><span class="date" id="today"></span><div class="bell">🔔</div></div>
+ </header>
+ <section class="content">
+  <div class="hero"><div class="eyebrow">Management Information System</div><h2>Executive Dashboard</h2><p>Ringkasan kinerja dan monitoring operasional <b>PLN ULP Empang</b></p><div class="updated" id="updated">Memuat data...</div></div>
+  <div class="filters">
+   <div class="field"><label>Tahun</label><select id="year" onchange="load()"><option value="">Semua Tahun</option></select></div>
+   <div class="field"><label>Bulan</label><select id="month" onchange="load()"><option value="">Semua Bulan</option></select></div>
+   <div class="field"><label>Status</label><select id="status" onchange="load()"><option>Semua</option><option>Selesai</option><option>Proses</option><option>Belum</option></select></div>
+   <div class="field"><label>Bidang</label><select id="bidang" onchange="module(this.value)"><option value="semua">Semua Bidang</option><option value="teknik">Teknik Jaringan</option><option value="transaksi">Transaksi Energi</option><option value="pelayanan">Pelayanan Pelanggan</option><option value="k3l">K3L</option><option value="pengusahaan">Pengusahaan</option></select></div>
+   <button class="refresh" onclick="load()">↻</button>
+  </div>
+  <div id="content"></div>
+ </section>
+</main>
+</div>
+<div class="toast hidden" id="toast"></div>
+<script>
+const MENUS=[['home','🏠','Beranda'],['teknik','🔧','Teknik Jaringan'],['transaksi','⚡','Transaksi Energi'],['pelayanan','👥','Pelayanan Pelanggan'],['k3l','🦺','K3L'],['pengusahaan','💰','Pengusahaan'],['laporan','📋','Laporan'],['rekap','📊','Rekap Data']];
+let D=null,CUR='home';
+function boot(){
+ document.getElementById('nav').innerHTML=MENUS.map(m=>`<button id="n-${m[0]}" onclick="module('${m[0]}')"><i>${m[1]}</i>${m[2]}</button>`).join('');
+ document.getElementById('today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'short',year:'numeric'});
+ load();
+}
+function toggleSide(){document.getElementById('side').classList.toggle('open')}
+function module(m){
+ CUR=m;
+ const map={home:'semua',laporan:'semua',rekap:'semua'};
+ document.getElementById('bidang').value=map[m]||m;
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+ const b=document.getElementById('n-'+m);if(b)b.classList.add('active');
+ if(innerWidth<=720)document.getElementById('side').classList.remove('open');
+ render();
+}
+function f(){return{year:year.value,month:month.value,status:status.value}}
+function apiGet(params){return new Promise((resolve,reject)=>{const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const s=document.createElement('script');const q=new URLSearchParams(params||{});q.set('callback',cb);window[cb]=d=>{delete window[cb];s.remove();resolve(d)};s.onerror=()=>{delete window[cb];s.remove();reject(new Error('API tidak dapat diakses'))};s.src='https://script.google.com/macros/s/AKfycbysDV8suT1MBJF8LiX4zxNHUzZdnP9FT9BpnaI01QjnFDznRIFyZlPSD-5kRb5k0TL_aQ/exec?'+q.toString();document.head.appendChild(s)})}
+async function apiData(){return apiGet({api:'getData'})}
+async function load(){try{const d=await apiData();D=d;fill();document.getElementById('updated').textContent='Data diperbarui '+(d.updated||'');uName.textContent=(d.user&&d.user.nama)||'Pengguna';uRole.textContent=((d.user&&d.user.role)||'VIEWER')+' • '+((d.user&&d.user.bidang)||'Semua');render()}catch(e){toast('Gagal: '+e.message)}}
+function fill(){
+ if(year.options.length===1)(D.years||[]).forEach(x=>year.add(new Option(x,x)));
+ if(month.options.length===1)(D.months||[]).slice(1).forEach(x=>month.add(new Option(x.t,x.v)));
+}
+function render(){
+ if(!D)return;
+ if(['home','laporan','rekap'].includes(CUR))home();else mod(CUR);
+}
+function home(){
+ title.textContent='Executive Dashboard';sub.textContent='PLN ULP Empang • PLN UP3 Sumbawa';
+ const s=D.summary,t=s.teknik.total+s.transaksi.total+s.pelayanan.total+s.k3l.total;
+ const done=s.teknik.selesai+s.transaksi.selesai+s.pelayanan.selesai+s.k3l.selesai;
+ const proc=s.teknik.proses+s.transaksi.proses+s.pelayanan.proses+s.k3l.proses;
+ const pend=s.teknik.belum+s.transaksi.belum+s.pelayanan.belum+s.k3l.belum;
+ const rate=t?done/t*100:0;
+ content.innerHTML=`
+ <div class="kpis">
+  ${k('📁','blue','Total Pekerjaan',t,'Semua bidang sesuai filter')}
+  ${k('✓','green','Selesai',done,rate.toFixed(0)+'% penyelesaian')}
+  ${k('◷','yellow','Dalam Proses',proc,'Sedang ditangani')}
+  ${k('!','red','Tertunda',pend,'Perlu tindak lanjut')}
+  ${k('⚡','cyan','Pengusahaan',D.summary.pengusahaan.rate.toFixed(1)+'%','Pencapaian target')}
+ </div>
+ <div class="grid"><div>
+  <div class="panel"><div class="head"><h3>Tren Kinerja Bulanan</h3><span>${year.value||new Date().getFullYear()}</span></div>${trendChart(D.trend)}</div>
+  <div class="panel"><div class="head"><h3>Rekap Kinerja per Bidang</h3><span>Monitoring terintegrasi</span></div>${areas(s)}</div>
+  <div class="panel"><div class="head"><h3>Aktivitas Terbaru</h3><span>12 aktivitas</span></div>${latest(D.latest)}</div>
+ </div><div>
+  <div class="panel"><div class="head"><h3>Status Pekerjaan</h3><span>${rate.toFixed(0)}% selesai</span></div>${donut(t,done,proc,pend)}</div>
+  <div class="panel"><div class="head"><h3>Pengusahaan</h3><span>Target vs Realisasi</span></div>${business(D.summary.pengusahaan)}</div>
+  <div class="panel"><div class="head"><h3>Highlight Manajemen</h3><span>Informasi terbaru</span></div>${notices(D.announcements)}</div>
+ </div></div>`;
+}
+function k(ic,cl,l,v,s){return`<div class="kpi"><div class="icon ${cl}">${ic}</div><div class="lbl">${l}</div><div class="val">${typeof v==='number'?fmt(v):v}</div><div class="sub">${s}</div></div>`}
+function trendChart(a){
+ const mx=Math.max(1,...a.map(x=>Math.max(x.total,1)));
+ return `<div class="chart">${a.map(x=>`<div class="monthcol"><div class="stackwrap">
+ <div class="bar done" style="height:${x.done/mx*100}%"></div><div class="bar proc" style="height:${x.process/mx*100}%"></div><div class="bar pend" style="height:${x.pending/mx*100}%"></div>
+ </div><small>${x.label}</small></div>`).join('')}</div><div class="legend"><span><b style="background:#2aaa76"></b>Selesai</span><span><b style="background:#f0b12b"></b>Proses</span><span><b style="background:#df5962"></b>Tertunda</span></div>`;
+}
+function areas(s){
+ const a=[['Teknik Jaringan',s.teknik],['Transaksi Energi',s.transaksi],['Pelayanan Pelanggan',s.pelayanan],['K3L',s.k3l]];
+ return a.map(x=>`<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;font-size:10px"><b>${x[0]}</b><span>${x[1].rate.toFixed(0)}% selesai</span></div><div class="progress"><span style="width:${x[1].rate}%"></span></div><div class="muted">${x[1].total} data • ${x[1].selesai} selesai • ${x[1].proses} proses • ${x[1].belum} tertunda</div></div>`).join('');
+}
+function donut(t,d,p,x){
+ const a=t?d/t*100:0,b=t?p/t*100:0,c=t?x/t*100:0;
+ return `<div class="donutrow"><div class="donut" style="background:conic-gradient(#2aaa76 0 ${a}%,#f0b12b ${a}% ${a+b}%,#df5962 ${a+b}% 100%)"><div class="dc">${t}<small>Total</small></div></div><div><div class="srow"><span class="miniDot" style="background:#2aaa76"></span>Selesai <b>${a.toFixed(0)}%</b></div><div class="srow"><span class="miniDot" style="background:#f0b12b"></span>Proses <b>${b.toFixed(0)}%</b></div><div class="srow"><span class="miniDot" style="background:#df5962"></span>Tertunda <b>${c.toFixed(0)}%</b></div></div></div>`;
+}
+function business(s){
+ const p=Math.min(100,s.rate||0);
+ return `<div class="business"><div class="metric"><span>Target</span><strong>${fmt(s.target)}</strong></div><div class="metric"><span>Realisasi</span><strong>${fmt(s.realisasi)}</strong></div><div class="track"><span style="width:${p}%"></span></div><div class="muted" style="margin-top:7px">Pencapaian target: <b>${s.rate.toFixed(1)}%</b></div></div>`;
+}
+function notices(a){if(!a.length)return'<div class="empty">Belum ada informasi.</div>';return a.map(x=>`<div class="notice"><b>📣 ${esc(x.Judul||'Informasi')}</b><small>${esc(x.Isi||'')}</small></div>`).join('')}
+function latest(a){if(!a.length)return'<div class="empty">Belum ada aktivitas.</div>';return`<div style="overflow:auto"><table><thead><tr><th>Tanggal</th><th>Bidang</th><th>Kegiatan</th><th>Lokasi</th><th>Status</th></tr></thead><tbody>${a.map(x=>`<tr><td>${x.tanggal}</td><td>${x.bidang}</td><td>${esc(x.kegiatan)}</td><td>${esc(x.lokasi)}</td><td>${badge(x.status)}</td></tr>`).join('')}</tbody></table></div>`}
+function mod(m){
+  if(m==='pengusahaan'){pengusahaanDashboard();return;}
+  const meta={teknik:['🔧','Teknik Jaringan','Monitoring pekerjaan dan kondisi jaringan'],transaksi:['⚡','Transaksi Energi','Monitoring meter dan transaksi energi'],pelayanan:['👥','Pelayanan Pelanggan','Monitoring pelayanan dan pengaduan'],k3l:['🦺','K3L','Safety, inspeksi, temuan dan tindak lanjut']}[m];
+  title.textContent=meta[1];sub.textContent=meta[2];
+  apiGet({api:'getModule',bidang:m,year:year.value,month:month.value,status:status.value}).then(rows=>{
+   const ss=D.summary[m];
+   content.innerHTML=`<div class="moduleHead"><div class="mi">${meta[0]}</div><div><h2>${meta[1]}</h2><p>${meta[2]}</p></div><div class="actions"><button class="btn">＋ Input Data</button></div></div>
+   <div class="kpis">${k(meta[0],'blue','Total Data',ss.total,'Sesuai filter')}${k('✓','green','Selesai',ss.selesai||0,'')}${k('◷','yellow','Proses',ss.proses||0,'')}${k('!','red','Belum',ss.belum||0,'')}${k('↗','cyan','Penyelesaian',(ss.rate||0).toFixed(1)+'%','Completion rate')}</div>
+   <div class="panel"><div class="head"><h3>Data ${meta[1]}</h3><span>${rows.length} record</span></div>${table(m,rows)}</div>`;
+  }).catch(e=>toast('Gagal: '+e.message));
+}
+
+function pengusahaanDashboard(){
+  title.textContent='Data Pengusahaan';
+  sub.textContent='PLN ULP Empang • Penjualan, pelanggan, aset, SDM & TAD';
+  content.innerHTML=`<div class="empty">Memuat Data Pengusahaan...</div>`;
+  apiGet({api:'getPengusahaanDashboard',year:year.value,month:month.value,status:status.value}).then(pengusahaanRender).catch(e=>toast('Gagal memuat Data Pengusahaan: '+e.message));
+}
+
+function pengusahaanRender(x){
+  const c=x.cards||{};
+  const latest=x.latest||{};
+  const fmtKwh=v=>formatBig_(v);
+  const fmtRp=v=>'Rp '+formatBig_(v);
+  const pct=v=>Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:2})+'%';
+  const period=latest['BULAN']||'Periode terpilih';
+
+  const trend=(x.trends||[]).slice(-12);
+  const maxK=Math.max(1,...trend.map(a=>Number(a.penjualan)||0));
+  const trendHtml=trend.length?`<div class="pe-chart">${trend.map(a=>`
+    <div class="pe-col">
+      <div class="pe-bar-wrap"><div class="pe-bar" style="height:${Math.max(3,(Number(a.penjualan)||0)/maxK*100)}%"></div></div>
+      <div class="pe-val">${formatShort_(a.penjualan)}</div>
+      <small>${shortMonth_(a.bulan)}</small>
+    </div>`).join('')}</div>`:`<div class="empty">Belum ada data penjualan.</div>`;
+
+  const tariff=barList_(x.tarif,'Pelanggan menurut Golongan Tarif');
+  const category=barList_(x.kategori,'Pelanggan menurut Kategori');
+  const kec=barList_(x.kec,'Pelanggan menurut Kecamatan');
+  const tad=barList_(x.tad,'Komposisi TAD');
+
+  const aset=x.aset||{};
+  const asetCards=`
+    <div class="pe-mini"><span>⚡ Penyulang</span><b>${fmtInt_(aset.penyulang)}</b></div>
+    <div class="pe-mini"><span>◉ Keypoint</span><b>${fmtInt_(aset.keypoint)}</b></div>
+    <div class="pe-mini"><span>▦ Gardu</span><b>${fmtInt_(aset.gardu)}</b></div>
+    <div class="pe-mini"><span>↔ JTM</span><b>${Number(aset.jtm||0).toLocaleString('id-ID',{maximumFractionDigits:1})} km</b></div>
+    <div class="pe-mini"><span>↔ JTR</span><b>${Number(aset.jtr||0).toLocaleString('id-ID',{maximumFractionDigits:1})} km</b></div>`;
+
+  const sdm=x.sdm||[];
+  const sdmRows=sdm.length?sdm.map(r=>`<tr><td>${esc(r['No']||'')}</td><td>${esc(r['Nama']||'')}</td><td>${esc(r['Jabatan']||'')}</td></tr>`).join(''):`<tr><td colspan="3">Belum ada data SDM.</td></tr>`;
+
+  content.innerHTML=`
+  <div class="pe-title">
+    <div class="moduleHead" style="margin:0">
+      <div class="mi">💰</div><div><h2>Data Pengusahaan</h2><p>Dashboard khusus pengusahaan • data tetap terpisah dari Executive Dashboard utama</p></div>
+    </div>
+    <div class="pe-period"><span>Periode</span><b>${esc(period)}</b></div>
+  </div>
+
+  <div class="pe-kpis">
+    ${peKpi('👥','Pelanggan',fmtInt_(c.pelanggan),'Jumlah pelanggan')}
+    ${peKpi('⚡','Daya Tersambung',formatShort_(c.daya),'VA')}
+    ${peKpi('▥','Penjualan KWh',fmtKwh(c.penjualanKwh),'Realisasi periode')}
+    ${peKpi('Rp','Pendapatan',fmtRp(c.pendapatan),'Rp pendapatan')}
+    ${peKpi('↗','Growth KWh YoY',pct(c.growth),'Pertumbuhan')}
+  </div>
+
+  <div class="pe-grid">
+    <div class="panel pe-panel">
+      <div class="head"><h3>Trend Penjualan KWh</h3><span>${year.value||'Semua tahun'}</span></div>
+      ${trendHtml}
+      <div class="pe-foot"><span>Natural Growth <b>${formatShort_(c.natural)}</b></span><span>Non Natural Growth <b>${formatShort_(c.nonNatural)}</b></span></div>
+    </div>
+    <div class="panel pe-panel">
+      <div class="head"><h3>Ringkasan Periode</h3><span>${esc(period)}</span></div>
+      <div class="pe-summary">
+        <div><small>Jumlah Pelanggan</small><strong>${fmtInt_(c.pelanggan)}</strong></div>
+        <div><small>Daya Tersambung</small><strong>${formatShort_(c.daya)}</strong></div>
+        <div><small>Penjualan</small><strong>${formatShort_(c.penjualanKwh)} kWh</strong></div>
+        <div><small>Pendapatan</small><strong>${fmtRp(c.pendapatan)}</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pe-grid">
+    <div class="panel pe-panel">${tariff}</div>
+    <div class="panel pe-panel">${category}</div>
+  </div>
+
+  <div class="pe-grid">
+    <div class="panel pe-panel">${kec}</div>
+    <div class="panel pe-panel">
+      <div class="head"><h3>Aset Jaringan</h3><span>Sesuai periode</span></div>
+      <div class="pe-asset-grid">${asetCards}</div>
+    </div>
+  </div>
+
+  <div class="pe-grid">
+    <div class="panel pe-panel">
+      <div class="head"><h3>SDM ULP Empang</h3><span>${sdm.length} personel</span></div>
+      <div style="overflow:auto"><table><thead><tr><th>No</th><th>Nama</th><th>Jabatan</th></tr></thead><tbody>${sdmRows}</tbody></table></div>
+    </div>
+    <div class="panel pe-panel">${tad}</div>
+  </div>
+
+  <div class="panel pe-panel">
+    <div class="head"><h3>Data Penjualan Detail</h3><span>${(x.sheets.penjualan||[]).length} record</span></div>
+    ${pengusahaanPenjualanTable(x.sheets.penjualan||[])}
+  </div>`;
+}
+
+function barList_(arr,titleText){
+  arr=arr||[];
+  const max=Math.max(1,...arr.map(a=>Number(a.value)||0));
+  return `<div class="head"><h3>${titleText}</h3><span>${arr.length} kelompok</span></div>`+
+    (arr.length?`<div class="pe-bars">${arr.slice(0,12).map(a=>`<div class="pe-bar-row"><div><span>${esc(a.label)}</span><b>${fmtInt_(a.value)}</b></div><div class="pe-track"><i style="width:${Math.max(2,(a.value/max)*100)}%"></i></div></div>`).join('')}`:`<div class="empty">Belum ada data.</div>`);
+}
+
+function pengusahaanPenjualanTable(rows){
+  if(!rows.length)return'<div class="empty">Belum ada data penjualan.</div>';
+  const cols=['BULAN','JUMLAH PELANGGAN','DAYA TERSAMBUNG','PENJUALAN (KWH)','RP PENDAPATAN','GROWTH KWH YOY'];
+  return `<div style="overflow:auto"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rows.slice().reverse().slice(0,24).map(r=>`<tr>${cols.map(c=>`<td>${esc(r[c]??'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+function peKpi(icon,label,value,sub){
+  return `<div class="pe-kpi"><div class="pe-icon">${icon}</div><div><small>${label}</small><strong>${value}</strong><em>${sub}</em></div></div>`;
+}
+
+function fmtInt_(v){return Math.round(Number(v)||0).toLocaleString('id-ID');}
+function formatBig_(v){
+  const n=Number(v)||0;
+  return n.toLocaleString('id-ID',{maximumFractionDigits:2});
+}
+function formatShort_(v){
+  const n=Number(v)||0;
+  const a=Math.abs(n);
+  if(a>=1000000000)return (n/1000000000).toLocaleString('id-ID',{maximumFractionDigits:2})+' M';
+  if(a>=1000000)return (n/1000000).toLocaleString('id-ID',{maximumFractionDigits:2})+' Jt';
+  if(a>=1000)return (n/1000).toLocaleString('id-ID',{maximumFractionDigits:1})+' Rb';
+  return n.toLocaleString('id-ID',{maximumFractionDigits:2});
+}
+function shortMonth_(s){
+  const z=String(s||'').split(' ')[0].toLowerCase();
+  const m={januari:'Jan',februari:'Feb',maret:'Mar',april:'Apr',mei:'Mei',juni:'Jun',juli:'Jul',agustus:'Agu',september:'Sep',oktober:'Okt',november:'Nov',desember:'Des'};
+  return m[z]||String(s||'').slice(0,6);
+}
+
+function table(m,r){
+ if(!r.length)return'<div class="empty">Tidak ada data untuk filter yang dipilih.</div>';
+ const c={teknik:['ID','Tanggal','Penyulang','Lokasi','Jenis Pekerjaan','Status','Petugas'],transaksi:['ID','Tanggal','ID Pelanggan','Nomor Meter','Merk Meter','Kegiatan','Status','Petugas'],pelayanan:['ID','Tanggal','ID Pelanggan','Jenis Pelayanan','Nama Pelanggan','Status','Petugas'],k3l:['ID','Tanggal','Kegiatan','Lokasi','Status','Temuan','Tindak Lanjut'],pengusahaan:['ID','Tanggal','Indikator','Target','Realisasi','Satuan','Persentase']}[m];
+ return`<div style="overflow:auto"><table><thead><tr>${c.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${r.slice(0,200).map(x=>`<tr>${c.map(y=>`<td>${y==='Status'?badge(x[y]):esc(x[y]??'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function badge(s){const l=String(s||'').toLowerCase();let c=l.includes('selesai')?'bg':l.includes('proses')?'by':l.includes('belum')?'br':'bb';return`<span class="badge ${c}">${esc(s||'-')}</span>`}
+function fmt(n){return Number(n||0).toLocaleString('id-ID')}
+function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function toast(t){const x=document.getElementById('toast');x.textContent=t;x.classList.remove('hidden');setTimeout(()=>x.classList.add('hidden'),2500)}
+boot();
+</script>
+<script>(function(){function b(){var e=document.querySelector('.pe-chart');if(!e||e.__sw)return;e.__sw=1;var d=0,x=0,s=0;e.addEventListener('touchstart',function(a){d=1;x=a.touches[0].clientX;s=e.scrollLeft},{passive:true});e.addEventListener('touchmove',function(a){if(!d)return;var dx=a.touches[0].clientX-x;if(Math.abs(dx)>6){a.preventDefault();e.scrollLeft=s-dx}},{passive:false});e.addEventListener('touchend',function(){d=0},{passive:true})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',b);else b();setTimeout(b,1000)})();</script></body>
+</html>
