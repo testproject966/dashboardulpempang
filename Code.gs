@@ -64,6 +64,60 @@ function doGet(e){
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }catch(err){ return jsonp_({ok:false,error:String(err)},p.callback); }
 }
+function doPost(e){
+  try{
+    const p=JSON.parse((e&&e.postData&&e.postData.contents)||'{}');
+    if(p.api==='appendRows') return jsonp_({ok:true,result:appendRows(String(p.sheet||''),p.rows||[])},p.callback);
+    if(p.api==='addRecord') return jsonp_({ok:true,result:addRecord(String(p.sheet||''),p.row||[])},p.callback);
+    return jsonp_({ok:false,error:'API POST tidak dikenal.'},p.callback);
+  }catch(err){ return jsonp_({ok:false,error:String(err)},(e&&e.parameter&&e.parameter.callback)||''); }
+}
+
+function apiSheetName_(name){
+  const map={
+    teknik:'Teknik Jaringan',jaringan:'Teknik Jaringan',
+    transaksi:'Transaksi Energi',transaksi_energi:'Transaksi Energi',
+    pelayanan:'Pelayanan Pelanggan',pelayanan_pelanggan:'Pelayanan Pelanggan',
+    k3l:'K3L',pengusahaan:'Pengusahaan',
+    KPI:'KPI',kpi:'KPI',
+    PENJUALAN:'PENJUALAN','PLGTARIF':'PLG/TARIF','PLGKATEGORI':'PLG/KATEGORI',
+    'PLGKEC':'PLG/KEC','PLGKECAMATAN':'PLG/KEC','ASET':'ASET','SDM':'SDM','TAD':'TAD'
+  };
+  return map[name]||map[String(name).toLowerCase()]||name;
+}
+
+function appendRows(sheetName,rows){
+  const name=apiSheetName_(sheetName);
+  if(!Array.isArray(rows)||!rows.length) return {count:0,sheet:name};
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  let sh=ss.getSheetByName(name);
+  if(!sh) sh=ss.insertSheet(name);
+  const existingHeaders=sh.getLastColumn()>0&&sh.getLastRow()>0?sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0]:[];
+  if(!existingHeaders.length || existingHeaders.every(x=>x==='')){
+    sh.getRange(1,1,1,rows[0].length).setValues([rows[0].map((x,i)=>String(x||('Kolom '+(i+1))) )]);
+    rows=rows.slice(1);
+  }
+  if(rows.length){
+    const width=sh.getLastColumn();
+    const normalized=rows.map(r=>Array.from({length:width},(_,i)=>r[i]??''));
+    sh.getRange(sh.getLastRow()+1,1,normalized.length,width).setValues(normalized);
+  }
+  return {count:rows.length,sheet:name};
+}
+
+function addRecord(sheetName,row){
+  const name=apiSheetName_(sheetName);
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  let sh=ss.getSheetByName(name);
+  if(!sh) sh=ss.insertSheet(name);
+  if(sh.getLastColumn()===0){
+    sh.getRange(1,1,1,row.length).setValues([row.map((_,i)=>'Kolom '+(i+1))]);
+  }
+  const width=sh.getLastColumn();
+  sh.getRange(sh.getLastRow()+1,1,1,width).setValues([Array.from({length:width},(_,i)=>row[i]??'')]);
+  return {ok:true,sheet:name};
+}
+
 function jsonp_(data,callback){
   const cb=String(callback||'').replace(/[^A-Za-z0-9_.$]/g,'');
   const body=JSON.stringify(data);
