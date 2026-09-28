@@ -21,7 +21,7 @@ import java.io.FileOutputStream
 
 class MainActivity : Activity() {
  private lateinit var web: WebView
- private val dashboardUrl = "https://testproject966.github.io/dashboardulpempang/?app=android&mobile=1&v=4"
+ private val dashboardUrl = "https://testproject966.github.io/dashboardulpempang/?app=android&mobile=1&v=5"
  inner class AndroidBridge {
   @JavascriptInterface fun savePpt(base64:String,fileName:String){try{
    val bytes=Base64.decode(base64,Base64.DEFAULT)
