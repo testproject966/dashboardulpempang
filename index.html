@@ -100,6 +100,40 @@ tbody tr:hover td{background:#f7fbff}
 @media(max-width:1100px){.support-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.support-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:430px){.support-grid,.support-steps{grid-template-columns:1fr}.support-card{min-height:200px}}
 
+
+/* BRIGHT executive polish + clear hierarchical navigation */
+:root{--nav:#062b46;--nav2:#0a4667;--primary:#0876b8;--primary2:#075e9b;--bg:#edf5f8;--line:#dce8ef;--shadow:0 12px 30px rgba(6,43,70,.07)}
+body{background:radial-gradient(ellipse at 88% 0%,rgba(10,164,179,.09),transparent 36%),linear-gradient(180deg,#f0f7fa 0%,#eaf2f6 100%)}
+.side{background:linear-gradient(175deg,#062b46 0%,#07476a 72%,#06314d 100%);box-shadow:5px 0 26px rgba(3,31,51,.12)}
+.logo{background:linear-gradient(145deg,#fff,#dff6fb);color:#0875a9;box-shadow:0 8px 18px rgba(1,21,36,.12)}
+.logoarea{padding:24px 18px;min-height:96px}
+.logoarea b{font-size:15px;letter-spacing:.1px;line-height:1.08}
+.logoarea small{font-size:9px;letter-spacing:1.05px;font-weight:700}
+.nav{padding:14px 10px 18px}
+.nav button{font-size:12px;letter-spacing:.1px;padding:12px 12px}
+.nav button.active{background:linear-gradient(100deg,#087cae,#087e9e);box-shadow:inset 3px 0 #ffd83d,0 7px 18px rgba(0,17,31,.13)}
+.nav-sub{margin:1px 0 10px 22px;padding:2px 0 2px 10px;border-left:1px solid rgba(195,229,239,.22)}
+.nav .nav-sub button{font-size:11px;font-weight:500;padding:8px 9px;margin-bottom:1px;color:#b9d8e7;border-radius:7px}
+.nav .nav-sub button:hover,.nav .nav-sub button.active{background:rgba(31,176,194,.16);color:#fff;transform:none;box-shadow:none}
+.top{background:rgba(255,255,255,.92);border:1px solid rgba(214,231,239,.9);border-radius:15px;margin:14px 16px 0;height:64px;padding:0 20px;box-shadow:0 7px 20px rgba(8,45,73,.035)}
+.main{margin-left:240px}
+.content{padding:18px 26px 42px;max-width:1600px}
+.hero{background:linear-gradient(112deg,#07375a 0%,#086b9e 57%,#079eaf 100%);border-radius:22px;padding:27px 28px 24px;box-shadow:0 15px 34px rgba(5,74,111,.16);margin-bottom:17px}
+.hero h2{font-size:29px;letter-spacing:-.6px}
+.hero .eyebrow{font-size:10px;font-weight:800;letter-spacing:1.4px}
+.hero-actions{gap:10px}
+.hero-btn{border-radius:10px;padding:11px 15px;font-size:11px;font-weight:800}
+.hero .yellow-btn{background:#ffd53f;color:#173e58;box-shadow:0 5px 14px rgba(0,25,40,.10)}
+.upload-strip{border-radius:13px;box-shadow:0 5px 16px rgba(0,26,42,.05)}
+.drop-zone{border-radius:14px;border-color:rgba(215,244,249,.42);background:rgba(1,40,65,.16);min-height:94px}
+.business-kpis{gap:14px}
+.biz-kpi{min-height:145px;box-shadow:0 9px 24px rgba(7,60,83,.055)}
+.biz-kpi strong{letter-spacing:-.5px}
+.biz-panel{box-shadow:0 9px 24px rgba(7,60,83,.045)}
+.nav-sub button:focus-visible,.nav button:focus-visible,.hero-btn:focus-visible{outline:2px solid #ffd53f;outline-offset:2px}
+.empty{padding:24px;text-align:center;color:#7893a5;background:#f8fbfc;border:1px dashed #cfe0e8;border-radius:12px;font-size:12px}
+@media(max-width:1100px){.top{margin:10px 10px 0}.content{padding:14px 16px 35px}}
+@media(max-width:720px){.top{margin:8px 8px 0;height:58px;padding:0 12px}.brand-line strong{font-size:11px}.content{padding:12px 10px 30px}.hero{padding:20px 16px;border-radius:16px}.hero h2{font-size:22px}.hero-actions{display:flex;flex-wrap:wrap}.hero-btn{padding:10px 11px}.nav-sub{margin-left:18px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -161,6 +195,18 @@ body{background:linear-gradient(135deg,#eaf4f7,#dfeef3);color:var(--ink)}
 </div>
 <div class="toast hidden" id="toast"></div>
 <script>
+// Explicit DOM references: avoid collisions with browser globals such as window.content/window.status.
+const content=document.getElementById('content');
+const title=document.getElementById('title');
+const sub=document.getElementById('sub');
+const month=document.getElementById('month');
+const year=document.getElementById('year');
+const status=document.getElementById('status');
+const bidang=document.getElementById('bidang');
+const uName=document.getElementById('uName');
+const uRole=document.getElementById('uRole');
+const updated=document.getElementById('updated');
+
 const MENUS=[
  ['home','⌂','HOME',[]],
  ['kpi','◉','KPI ULP',[]],
