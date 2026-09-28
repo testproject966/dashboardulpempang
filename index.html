@@ -135,8 +135,8 @@ body{background:linear-gradient(135deg,#eaf4f7,#dfeef3);color:var(--ink)}
    <h2 id="title">BRIGHT ULP EMPANG</h2>
    <p id="sub">EXECUTIVE COMMAND CENTER • Monitoring Kinerja Unit Terpadu</p>
    <div class="hero-actions" id="heroActions">
-    <button class="hero-btn" onclick="load()">↻ REFRESH</button>
-    <button class="hero-btn yellow-btn" onclick="downloadPPT()">↓ DOWNLOAD PPT</button>
+    <button class="hero-btn" id="refreshBtn" onclick="load()">↻ REFRESH</button>
+    <button class="hero-btn yellow-btn" id="downloadPptBtn" onclick="downloadPPT()">↓ DOWNLOAD PPT</button>
     <button class="hero-btn" onclick="openUpload()">↑ PILIH FILE</button>
     <select id="month" onchange="load()"><option value="">SEMUA BULAN</option></select>
     <button class="hero-btn extra-action hidden" id="resetFilter" onclick="resetFilters()">× RESET FILTER</button>
@@ -161,24 +161,39 @@ body{background:linear-gradient(135deg,#eaf4f7,#dfeef3);color:var(--ink)}
 </div>
 <div class="toast hidden" id="toast"></div>
 <script>
-const MENUS=[['home','🏠','Beranda'],['teknik','🔧','Teknik Jaringan'],['transaksi','⚡','Transaksi Energi'],['pelayanan','👥','Pelayanan Pelanggan'],['k3l','🦺','K3L'],['pengusahaan','💰','Pengusahaan'],['laporan','📋','Laporan'],['rekap','📊','Rekap Data'],['pendukung','🧰','Pendukung Data']];
-let D=null,CUR='home';
+const MENUS=[
+ ['home','⌂','HOME',[]],
+ ['kpi','◉','KPI ULP',[]],
+ ['teknik','▣','JARINGAN',[]],
+ ['transaksi','▤','TRANSAKSI ENERGI',[]],
+ ['pelayanan','◉','PELAYANAN PELANGGAN',[]],
+ ['k3l','♢','K3L',[]],
+ ['pengusahaan','▦','PENGUSAHAAN',[['penjualan','Penjualan'],['pelanggan','Pelanggan'],['aset','Aset'],['sdm','SDM'],['tad','TAD']]],
+ ['pendukung','⚙','PENDUKUNG',[['database','Database'],['upload','Upload & Validasi'],['export','Export Data'],['system','Status Sistem']]]
+];
+let D=null,PE=null,CUR='home';
 function boot(){
- document.getElementById('nav').innerHTML=MENUS.map(m=>`<button id="n-${m[0]}" onclick="module('${m[0]}')"><i>${m[1]}</i>${m[2]}</button>`).join('');
- document.getElementById('today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'short',year:'numeric'});
+ const nav=document.getElementById('nav');
+ nav.innerHTML=MENUS.map(m=>'<button id="n-'+m[0]+'" onclick="module(\''+m[0]+'\')"><i>'+m[1]+'</i>'+m[2]+'</button>'+(m[3].length?'<div class="nav-sub">'+m[3].map(x=>'<button id="n-'+x[0]+'" onclick="module(\''+x[0]+'\')">↳ '+x[1]+'</button>').join('')+'</div>':'')).join('');
+ document.getElementById('today')?.textContent;
+ document.querySelector('.brand-right')?.setAttribute('title',new Date().toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}));
+ const dz=document.getElementById('dropZone');
+ if(dz){['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('dragging')}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('dragging')}));dz.addEventListener('drop',e=>{if(e.dataTransfer&&e.dataTransfer.files)handleFiles(e.dataTransfer.files)})}
  load();
 }
 function toggleSide(){document.getElementById('side').classList.toggle('open')}
 function module(m){
  CUR=m;
- const map={home:'semua',laporan:'semua',rekap:'semua'};
+ const map={home:'semua',kpi:'semua',laporan:'semua',rekap:'semua',penjualan:'pengusahaan',pelanggan:'pengusahaan',aset:'pengusahaan',sdm:'pengusahaan',tad:'pengusahaan',database:'semua',upload:'semua',export:'semua',system:'semua',pendukung:'semua'};
  document.getElementById('bidang').value=map[m]||m;
  document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
  const b=document.getElementById('n-'+m);if(b)b.classList.add('active');
+ if(['penjualan','pelanggan','aset','sdm','tad'].includes(m))document.getElementById('n-pengusahaan')?.classList.add('active');
+ if(['database','upload','export','system'].includes(m))document.getElementById('n-pendukung')?.classList.add('active');
  if(innerWidth<=720)document.getElementById('side').classList.remove('open');
  render();
 }
-function f(){return{year:year.value,month:month.value,status:status.value}}
+function f(){return{year:document.getElementById('year').value,month:document.getElementById('month').value,status:document.getElementById('status').value}}
 function apiGet(params){return new Promise((resolve,reject)=>{const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const s=document.createElement('script');const q=new URLSearchParams(params||{});q.set('callback',cb);window[cb]=d=>{delete window[cb];s.remove();resolve(d)};s.onerror=()=>{delete window[cb];s.remove();reject(new Error('API tidak dapat diakses'))};s.src='https://script.google.com/macros/s/AKfycbysDV8suT1MBJF8LiX4zxNHUzZdnP9FT9BpnaI01QjnFDznRIFyZlPSD-5kRb5k0TL_aQ/exec?'+q.toString();document.head.appendChild(s)})}
 async function apiData(){return apiGet({api:'getData'})}
 async function load(){try{const d=await apiData();D=d;fill();document.getElementById('updated').textContent='Data diperbarui '+(d.updated||'');uName.textContent=(d.user&&d.user.nama)||'Pengguna';uRole.textContent=((d.user&&d.user.role)||'VIEWER')+' • '+((d.user&&d.user.bidang)||'Semua');render()}catch(e){toast('Gagal: '+e.message)}}
@@ -188,9 +203,19 @@ function fill(){
 }
 function render(){
  if(!D)return;
- if(['home','laporan','rekap'].includes(CUR))home();else if(CUR==='pendukung')renderSupport();else mod(CUR);
+ if(CUR==='home')home();
+ else if(CUR==='kpi'||CUR==='laporan'||CUR==='rekap')kpiHome();
+ else if(CUR==='pendukung'||['database','upload','export','system'].includes(CUR))renderSupportRoute(CUR);
+ else if(['penjualan','pelanggan','aset','sdm','tad'].includes(CUR))loadPengusahaanSub(CUR);
+ else if(CUR==='pengusahaan')pengusahaanDashboard();
+ else mod(CUR);
 }
 function home(){
+ setHeroMode('home','BRIGHT ULP EMPANG','EXECUTIVE COMMAND CENTER • Monitoring Kinerja Unit Terpadu');
+ content.innerHTML='<div class="data-panel"><div class="empty">Memuat ringkasan pengusahaan dari Google Spreadsheet...</div></div>';
+ apiGet({api:'getPengusahaanDashboard',year:document.getElementById('year').value,month:document.getElementById('month').value}).then(x=>{PE=x;businessHomeRender(x)}).catch(e=>{content.innerHTML='<div class="data-panel"><div class="empty">Data belum dapat dimuat. Periksa koneksi Google Apps Script lalu tekan Refresh.</div></div>';toast('Gagal memuat ringkasan: '+e.message)});
+}
+function kpiHome(){
  title.textContent='Executive Dashboard';sub.textContent='PLN ULP Empang • PLN UP3 Sumbawa';
  const s=D.summary,t=s.teknik.total+s.transaksi.total+s.pelayanan.total+s.k3l.total;
  const done=s.teknik.selesai+s.transaksi.selesai+s.pelayanan.selesai+s.k3l.selesai;
@@ -214,6 +239,82 @@ function home(){
   <div class="panel"><div class="head"><h3>Pengusahaan</h3><span>Target vs Realisasi</span></div>${business(D.summary.pengusahaan)}</div>
   <div class="panel"><div class="head"><h3>Highlight Manajemen</h3><span>Informasi terbaru</span></div>${notices(D.announcements)}</div>
  </div></div>`;
+}
+function setHeroMode(mode,heading,subtitle){
+ const isHome=mode==='home';
+ document.getElementById('title').textContent=heading||'BRIGHT ULP EMPANG';
+ document.getElementById('sub').textContent=subtitle||'';
+ document.getElementById('heroEyebrow').textContent=isHome?'EXECUTIVE COMMAND CENTER • Monitoring Kinerja Unit Terpadu':(heading||'DATA PENGUSAHAAN')+' • PLN ULP EMPANG';
+ document.getElementById('homeUpload').classList.toggle('hidden',!isHome);
+ document.getElementById('dropZone').classList.toggle('hidden',!isHome);
+ document.getElementById('resetFilter').classList.toggle('hidden',isHome);
+ document.getElementById('exportFiltered').classList.toggle('hidden',isHome);
+ const ppt=document.getElementById('downloadPptBtn');if(ppt)ppt.classList.toggle('hidden',!isHome);
+ const refresh=document.getElementById('refreshBtn');if(refresh)refresh.textContent=isHome?'↻ REFRESH':'↻ REFRESH TABLE';
+}
+function businessHomeRender(x){
+ const c=x.cards||{},trends=x.trends||[],sheets=x.sheets||{},available=x.available||{};
+ const fmt=(v)=>Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:1});
+ const money=(v)=>'Rp '+Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:0});
+ const pct=(v)=>Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:1})+'%';
+ const kpis=[
+  ['◉','PELANGGAN',fmt(c.pelanggan),'periode terakhir'],
+  ['ϟ','PENJUALAN KWH',fmt(c.penjualanKwh),'kWh terjual'],
+  ['▣','PENDAPATAN',money(c.pendapatan),'periode terakhir'],
+  ['↗','GROWTH KWH YOY',pct(c.growth),'pertumbuhan tahunan']
+ ];
+ const max=Math.max(1,...trends.map(r=>Number(r.penjualan)||0));
+ const chart=trends.length?'<div class="biz-chart">'+trends.slice(-12).map(r=>'<div class="biz-col"><div class="bararea"><div class="biz-bar" title="'+esc(r.bulan||'')+': '+fmt(r.penjualan)+' kWh" style="height:'+Math.max(2,(Number(r.penjualan)||0)/max*100)+'%"></div></div><small>'+esc(shortMonth_(r.bulan))+'</small></div>').join('')+'</div><div class="biz-legend"><span>Trend penjualan tenaga listrik</span><span>'+trends.length+' periode</span></div>':'<div class="empty">Belum ada data tren penjualan pada Spreadsheet.</div>';
+ const datasets=[
+  ['Penjualan',sheets.penjualan||[],available.penjualan],
+  ['Tarif',sheets.tarif||[],available.tarif],
+  ['Kategori',sheets.kategori||[],available.kategori],
+  ['Kecamatan',sheets.kec||[],available.kec],
+  ['Aset',sheets.aset||[],available.aset],
+  ['SDM',sheets.sdm||[],available.sdm],
+  ['TAD',sheets.tad||[],available.tad]
+ ];
+ const totalRecords=datasets.reduce((n,d)=>n+d[1].length,0);
+ const ready=datasets.filter(d=>d[2]).length;
+ const comp=datasets.map(d=>'<div class="composition-row"><div class="row-label"><span>'+d[0]+'</span><b>'+d[1].length+' record</b></div><div class="row-track"><span style="width:'+Math.min(100,d[1].length/Math.max(1,...datasets.map(z=>z[1].length))*100)+'%"></span></div></div>').join('');
+ content.innerHTML='<div class="business-kpis">'+kpis.map(k=>'<div class="biz-kpi"><div class="biz-icon">'+k[0]+'</div><small>'+k[1]+'</small><strong>'+k[2]+'</strong><em>'+k[3]+'</em></div>').join('')+'</div>'+
+ '<div class="biz-grid"><div class="biz-panel"><div class="biz-panel-head"><h3>TREND PENJUALAN KWH</h3><small>'+(x.latest&&x.latest.BULAN?esc(x.latest.BULAN):'Memuat periode...')+'</small></div>'+chart+'</div>'+
+ '<div class="biz-panel"><div class="biz-panel-head"><h3>KOMPOSISI MONITORING</h3><small>jumlah record</small></div><div class="composition-grid"><div class="composition-tile"><strong>'+ready+'</strong><small>dataset tersedia</small></div><div class="composition-tile"><strong>'+totalRecords+'</strong><small>total record</small></div></div><div class="composition-bars">'+comp+'</div></div></div>';
+}
+function resetFilters(){document.getElementById('month').value='';document.getElementById('year').value='';document.getElementById('status').value='Semua';load()}
+function exportCurrentData(){
+ const m=CUR==='pengusahaan'?'penjualan':CUR;
+ const map={penjualan:'penjualan',pelanggan:'tarif',aset:'aset',sdm:'sdm',tad:'tad'};
+ const key=map[m]||'penjualan';
+ const rows=PE&&PE.sheets&&PE.sheets[key]?PE.sheets[key]:[];
+ if(!rows.length){toast('Tidak ada data untuk diekspor.');return}
+ const headers=Object.keys(rows[0]);
+ const csv=[headers.join(','),...rows.map(r=>headers.map(h=>'"'+String(r[h]??'').replace(/"/g,'""')+'"').join(','))].join('\r\n');
+ const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='BRIGHT_ULP_EMPANG_'+key+'.csv';a.click();URL.revokeObjectURL(url);toast('Ekspor CSV dimulai.');
+}
+function loadPengusahaanSub(m){
+ const titles={penjualan:'PENJUALAN',pelanggan:'PELANGGAN',aset:'ASET',sdm:'SDM',tad:'TAD'};
+ setHeroMode('module',titles[m],'Data langsung dari Google Spreadsheet');
+ content.innerHTML='<div class="module-summary"><div class="summary-card"><small>Jumlah Data</small><strong>...</strong></div><div class="summary-card"><small>Periode</small><strong>-</strong></div><div class="summary-card"><small>Data Terbaru</small><strong>-</strong></div><div class="summary-card"><small>Status</small><strong>Memuat</strong></div></div><div class="data-panel"><h3>'+titles[m]+'</h3><div class="empty">Memuat data...</div></div>';
+ apiGet({api:'getPengusahaanDashboard',year:document.getElementById('year').value,month:document.getElementById('month').value}).then(x=>{
+  PE=x;
+  let rows=(x.sheets||{})[m]||[];
+  if(m==='pelanggan')rows=[...(x.sheets.tarif||[]),...(x.sheets.kategori||[]),...(x.sheets.kec||[])].map(r=>({...r}));
+  const latest=x.latest||{},period=latest.BULAN||'—';
+  const summary='<div class="module-summary"><div class="summary-card"><small>Jumlah Data</small><strong>'+rows.length+'</strong></div><div class="summary-card"><small>Periode</small><strong>'+esc(period)+'</strong></div><div class="summary-card"><small>Data Terbaru</small><strong>'+esc(period)+'</strong></div><div class="summary-card"><small>Status</small><strong>SIAP</strong></div></div>';
+  let tableHtml='';
+  if(!rows.length)tableHtml='<div class="empty">Belum ada data pada sheet '+titles[m]+'.</div>';
+  else{const keys=Object.keys(rows[0]);tableHtml='<div class="data-table-wrap"><table><thead><tr>'+keys.map(k=>'<th>'+esc(k)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+keys.map(k=>'<td>'+esc(r[k]??'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
+  content.innerHTML=summary+'<div class="data-panel"><h3>'+titles[m]+'</h3>'+tableHtml+'</div>';
+ }).catch(e=>{content.innerHTML='<div class="data-panel"><div class="empty">Gagal memuat data: '+esc(e.message)+'</div></div>'});
+}
+function renderSupportRoute(m){
+ setHeroMode('module',m==='pendukung'?'PENDUKUNG':({database:'DATABASE',upload:'UPLOAD & VALIDASI',export:'EXPORT DATA',system:'STATUS SISTEM'}[m]||'PENDUKUNG'),'Pengelolaan data • BRIGHT ULP EMPANG');
+ if(m==='upload'){renderSupport();setTimeout(()=>{const el=document.querySelector('.support-hero');if(el)el.scrollIntoView({block:'nearest'})},10);return}
+ if(m==='export'){content.innerHTML='<div class="data-panel"><h3>Export Data</h3><p>Ekspor data pengusahaan yang sedang dipilih melalui tombol Export Filtered.</p><button class="hero-btn" onclick="exportCurrentData()">↓ EXPORT FILTERED</button></div>';return}
+ if(m==='system'){content.innerHTML='<div class="module-summary"><div class="summary-card"><small>Backend</small><strong>Apps Script</strong></div><div class="summary-card"><small>Database</small><strong>Spreadsheet</strong></div><div class="summary-card"><small>Frontend</small><strong>GitHub Pages</strong></div><div class="summary-card"><small>Status</small><strong>Aktif</strong></div></div>';return}
+ renderSupport();
 }
 function k(ic,cl,l,v,s){return`<div class="kpi"><div class="icon ${cl}">${ic}</div><div class="lbl">${l}</div><div class="val">${typeof v==='number'?fmt(v):v}</div><div class="sub">${s}</div></div>`}
 function trendChart(a){
