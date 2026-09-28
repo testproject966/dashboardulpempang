@@ -50,6 +50,40 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:8px;border
 @media(max-width:1100px){.pe-kpis{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:720px){.pe-title{align-items:flex-start;gap:8px}.pe-period{display:none}.pe-kpis{grid-template-columns:repeat(2,1fr)}.pe-grid{grid-template-columns:1fr}.pe-chart{height:200px}.pe-bar-wrap{height:140px}.pe-kpi strong{font-size:15px}.pe-summary{grid-template-columns:1fr 1fr}}
 @media(max-width:430px){.pe-kpis{grid-template-columns:1fr 1fr}.pe-kpi{padding:10px}.pe-icon{width:32px;height:32px}.pe-kpi strong{font-size:13px}}
+
+/* Visual refresh: dashboard executive BRIGHT ULP EMPANG */
+:root{--nav:#071f35;--nav2:#103b5d;--primary:#1268c4;--primary2:#0b57a4;--bg:#f2f6fb;--line:#e1e9f2;--r:16px;--shadow:0 10px 28px rgba(14,43,74,.075)}
+body{background:radial-gradient(ellipse at 90% 0%,rgba(25,105,190,.06),transparent 35%),var(--bg)}
+.side{background:linear-gradient(165deg,#071f35 0%,#0c3150 60%,#06192a 100%);box-shadow:5px 0 28px rgba(6,27,47,.10)}
+.logo{box-shadow:0 6px 18px rgba(255,214,46,.18)}
+.nav button{transition:background .18s ease,transform .18s ease}
+.nav button:hover{background:rgba(255,255,255,.09);transform:translateX(2px)}
+.nav button.active{background:linear-gradient(100deg,#1476df,#105bb5);box-shadow:0 7px 18px rgba(12,99,194,.25)}
+.top{backdrop-filter:blur(14px);box-shadow:0 3px 16px rgba(12,39,68,.035)}
+.hero{background:linear-gradient(112deg,#082e4b 0%,#105a9b 58%,#1976d2 100%);border:1px solid rgba(255,255,255,.12);box-shadow:0 14px 32px rgba(12,65,112,.18)}
+.hero:after{width:360px;height:360px;right:-70px;top:-210px;border:1px solid rgba(255,255,255,.10);box-shadow:0 0 0 30px rgba(255,255,255,.025),0 0 0 60px rgba(255,255,255,.02)}
+.filters,.kpi,.panel{border-color:#e4ebf3;box-shadow:0 8px 24px rgba(18,49,82,.045);transition:box-shadow .18s ease,border-color .18s ease}
+.panel{border-radius:16px}
+.kpi{border-radius:16px}
+.kpi:hover,.panel:hover{box-shadow:0 12px 28px rgba(18,49,82,.075);border-color:#d6e3f1}
+.kpi .icon{box-shadow:inset 0 0 0 1px rgba(17,75,130,.035)}
+.refresh,.btn,button{transition:filter .15s ease,transform .15s ease}
+.refresh:hover,.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+table{border-collapse:separate;border-spacing:0}
+th{background:#f3f7fb;color:#60758b;letter-spacing:.35px}
+tbody tr:hover td{background:#f7fbff}
+@media(max-width:760px){
+ .content{padding:14px 12px 30px}
+ .hero{padding:19px 17px;border-radius:15px}
+ .hero h2{font-size:21px;max-width:90%}
+ .filters{gap:8px;border-radius:12px}
+ .field select{min-height:40px}
+ .kpi{min-width:0}
+ .panel{padding:13px;border-radius:13px}
+ .head h3{font-size:12px}
+ .top{padding:0 12px}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
