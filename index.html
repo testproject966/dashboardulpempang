@@ -395,23 +395,122 @@ function openInput(sheet){
   if(vals.some(v=>v===null))return;
   apiPost({api:'addRecord',sheet:meta[1],row:vals}).then(()=>{toast('Data berhasil dikirim');setTimeout(load,700)}).catch(e=>toast('Gagal: '+e.message));
 }
-async function downloadPPT(){
-  if(typeof pptxgen==='undefined'&&typeof pptxgenjs==='undefined'){toast('Library PPT belum siap');return}
+async async function downloadPPT(){
+  if(typeof pptxgen==='undefined'&&typeof pptxgenjs==='undefined'){toast('Library PPT belum siap, coba muat ulang halaman');return}
   const P=typeof pptxgen!=='undefined'?pptxgen:pptxgenjs,pptx=new P();
-  pptx.layout='LAYOUT_WIDE';pptx.author='PLN ULP Empang';pptx.subject='BRIGHT ULP EMPANG';pptx.title='BRIGHT ULP EMPANG';
-  const slide=pptx.addSlide();slide.background={color:'F5F7FA'};
-  slide.addShape(pptx.ShapeType.rect,{x:0,y:0,w:13.333,h:0.65,fill:{color:'09263F'},line:{color:'09263F'}});
-  slide.addText('BRIGHT ULP EMPANG',{x:.45,y:.16,w:5,h:.25,fontSize:22,bold:true,color:'FFFFFF',margin:0});
-  slide.addText('PLN UP3 SUMBAWA',{x:8.9,y:.19,w:3.9,h:.2,fontSize:11,bold:true,color:'D7E6F3',align:'right',margin:0});
-  slide.addText('EXECUTIVE DASHBOARD',{x:.55,y:1.0,w:6.5,h:.4,fontSize:25,bold:true,color:'09263F',margin:0});
-  slide.addText('Ringkasan kinerja dan monitoring operasional',{x:.55,y:1.48,w:6.5,h:.25,fontSize:12,color:'728096',margin:0});
-  const s=D&&D.summary?D.summary:{teknik:{total:0,selesai:0},transaksi:{total:0,selesai:0},pelayanan:{total:0,selesai:0},k3l:{total:0,selesai:0},pengusahaan:{rate:0}};
-  const cards=[['TOTAL PEKERJAAN',s.teknik.total+s.transaksi.total+s.pelayanan.total+s.k3l.total],['SELESAI',s.teknik.selesai+s.transaksi.selesai+s.pelayanan.selesai+s.k3l.selesai],['PENGUSAHAAN',Number(s.pengusahaan.rate||0).toFixed(1)+'%'],['UPDATE',new Date().toLocaleDateString('id-ID')]];
-  cards.forEach((a,i)=>{const x=.55+i*3.1;slide.addShape(pptx.ShapeType.roundRect,{x,y:2.05,w:2.75,h:1.05,rectRadius:.08,fill:{color:'FFFFFF'},line:{color:'E7EBF0'}});slide.addText(a[0],{x:x+.15,y:2.22,w:2.4,h:.18,fontSize:8,bold:true,color:'728096',margin:0});slide.addText(String(a[1]),{x:x+.15,y:2.48,w:2.4,h:.35,fontSize:20,bold:true,color:'1769D1',margin:0});});
-  slide.addText('Kinerja per Bidang',{x:.55,y:3.45,w:4,h:.3,fontSize:16,bold:true,color:'09263F',margin:0});
-  [['Teknik Jaringan',s.teknik],['Transaksi Energi',s.transaksi],['Pelayanan Pelanggan',s.pelayanan],['K3L',s.k3l]].forEach((a,i)=>{const y=3.95+i*.65;const rate=Number(a[1].rate||0);slide.addText(a[0],{x:.55,y,w:2.4,h:.2,fontSize:9,color:'142235',margin:0});slide.addShape(pptx.ShapeType.rect,{x:3.0,y:y+.02,w:6.7,h:.22,fill:{color:'E9EEF4'},line:{color:'E9EEF4'}});slide.addShape(pptx.ShapeType.rect,{x:3.0,y:y+.02,w:6.7*Math.max(0,Math.min(100,rate))/100,h:.22,fill:{color:'2AAA76'},line:{color:'2AAA76'}});slide.addText(rate.toFixed(0)+'%',{x:9.9,y,w:.7,h:.2,fontSize:9,bold:true,color:'142235',margin:0});});
+  pptx.layout='LAYOUT_WIDE';pptx.author='PLN ULP Empang';pptx.subject='Laporan Kinerja PLN ULP Empang';pptx.title='BRIGHT ULP EMPANG';
+  pptx.company='PLN ULP Empang';pptx.lang='id-ID';
+  const C={nav:'09263F',blue:'1769D1',blue2:'0B57A4',bg:'F3F6FA',ink:'142235',muted:'728096',line:'E2E8F0',green:'1E9E6A',yellow:'E7A52A',red:'D94B57',white:'FFFFFF'};
+  const S=D&&D.summary?D.summary:{teknik:{total:0,selesai:0,proses:0,belum:0,rate:0},transaksi:{total:0,selesai:0,proses:0,belum:0,rate:0},pelayanan:{total:0,selesai:0,proses:0,belum:0,rate:0},k3l:{total:0,selesai:0,proses:0,belum:0,rate:0},pengusahaan:{rate:0,target:0,realisasi:0}};
+  const divisions=[['Teknik Jaringan',S.teknik],['Transaksi Energi',S.transaksi],['Pelayanan Pelanggan',S.pelayanan],['K3L',S.k3l]];
+  const total=divisions.reduce((n,a)=>n+Number(a[1].total||0),0);
+  const done=divisions.reduce((n,a)=>n+Number(a[1].selesai||0),0);
+  const process=divisions.reduce((n,a)=>n+Number(a[1].proses||0),0);
+  const pending=divisions.reduce((n,a)=>n+Number(a[1].belum||0),0);
+  const dateText=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+  const period=(year&&year.value?year.value:'Semua Tahun')+(month&&month.value&&month.value!=='0'?' • '+(month.options[month.selectedIndex]?.text||''):'');
+  function header(slide,title,subtitle){
+    slide.background={color:C.bg};
+    slide.addShape(pptx.ShapeType.rect,{x:0,y:0,w:13.333,h:.72,fill:{color:C.nav},line:{color:C.nav}});
+    slide.addText('BRIGHT ULP EMPANG',{x:.45,y:.17,w:4.8,h:.25,fontSize:18,bold:true,color:C.white,margin:0});
+    slide.addText('PLN UP3 SUMBAWA',{x:9,y:.22,w:3.85,h:.18,fontSize:10,bold:true,color:'D6E5F2',align:'right',margin:0});
+    slide.addText(title,{x:.55,y:.98,w:11.9,h:.38,fontSize:22,bold:true,color:C.nav,margin:0});
+    if(subtitle)slide.addText(subtitle,{x:.57,y:1.42,w:11.8,h:.25,fontSize:10,color:C.muted,margin:0});
+    slide.addShape(pptx.ShapeType.line,{x:.55,y:7.12,w:12.2,h:0,line:{color:C.line,width:1}});
+    slide.addText('BRIGHT ULP EMPANG  •  '+dateText,{x:.57,y:7.18,w:8,h:.15,fontSize:8,color:C.muted,margin:0});
+  }
+  function card(slide,x,y,w,label,value,color){
+    slide.addShape(pptx.ShapeType.roundRect,{x,y,w,h:1.08,rectRadius:.08,fill:{color:C.white},line:{color:C.line,width:.8},shadow:{type:'outer',color:'7A8DA1',blur:1,angle:45,distance:1,opacity:.08}});
+    slide.addShape(pptx.ShapeType.rect,{x,y,w:.07,h:1.08,fill:{color},line:{color}});
+    slide.addText(label.toUpperCase(),{x:x+.18,y:y+.18,w:w-.3,h:.16,fontSize:8,bold:true,color:C.muted,margin:0});
+    slide.addText(String(value),{x:x+.18,y:y+.43,w:w-.3,h:.38,fontSize:21,bold:true,color,margin:0,fit:'shrink'});
+  }
+  // 1. Cover
+  {
+    const sl=pptx.addSlide();sl.background={color:C.nav};
+    sl.addShape(pptx.ShapeType.rect,{x:0,y:0,w:13.333,h:7.5,fill:{color:C.nav},line:{color:C.nav}});
+    sl.addShape(pptx.ShapeType.rect,{x:0,y:0,w:.2,h:7.5,fill:{color:'FFD62E'},line:{color:'FFD62E'}});
+    sl.addShape(pptx.ShapeType.ellipse,{x:8.7,y:-1.1,w:5.3,h:5.3,fill:{color:'103B5D',transparency:18},line:{color:'1C527A',transparency:45,width:1.5}});
+    sl.addShape(pptx.ShapeType.ellipse,{x:9.5,y:3.7,w:3.6,h:3.6,fill:{color:'1769D1',transparency:48},line:{color:'1769D1',transparency:100}});
+    sl.addText('BRIGHT',{x:.8,y:1.25,w:6.4,h:.7,fontSize:42,bold:true,color:C.white,margin:0,charSpacing:2});
+    sl.addText('ULP EMPANG',{x:.82,y:2.03,w:6.5,h:.5,fontSize:27,bold:true,color:'FFD62E',margin:0,charSpacing:1.5});
+    sl.addText('EXECUTIVE PERFORMANCE DASHBOARD',{x:.85,y:2.85,w:6.5,h:.3,fontSize:14,bold:true,color:'D7E6F3',margin:0});
+    sl.addText('Monitoring kinerja operasional, pelayanan, K3L dan pengusahaan',{x:.85,y:3.35,w:7.3,h:.35,fontSize:12,color:'C0D2E2',margin:0,breakLine:false});
+    sl.addShape(pptx.ShapeType.line,{x:.85,y:4.05,w:5.7,h:0,line:{color:'52728B',width:1}});
+    sl.addText('PLN UP3 SUMBAWA',{x:.85,y:4.35,w:4.5,h:.25,fontSize:13,bold:true,color:C.white,margin:0});
+    sl.addText('Periode: '+period+'\nDisusun: '+dateText,{x:.85,y:4.78,w:5.5,h:.65,fontSize:11,color:'C0D2E2',breakLine:false,margin:0,paraSpaceAfterPt:5});
+    sl.addText('INTERNAL MANAGEMENT REPORT',{x:.85,y:6.8,w:5,h:.18,fontSize:8,bold:true,color:'8EA8BC',charSpacing:1.2,margin:0});
+  }
+  // 2. Executive overview
+  {
+    const sl=pptx.addSlide();header(sl,'Ringkasan Eksekutif','Snapshot indikator operasional berdasarkan data yang tersedia pada dashboard.');
+    card(sl,.58,1.95,2.85,'Total Pekerjaan',total,C.blue);
+    card(sl,3.72,1.95,2.85,'Pekerjaan Selesai',done,C.green);
+    card(sl,6.86,1.95,2.85,'Dalam Proses',process,C.yellow);
+    card(sl,10,1.95,2.75,'Belum Selesai',pending,C.red);
+    sl.addText('Tingkat penyelesaian pekerjaan',{x:.65,y:3.45,w:5.4,h:.3,fontSize:14,bold:true,color:C.nav,margin:0});
+    const rate=total?done/total*100:0;
+    sl.addText(rate.toFixed(1)+'%',{x:.65,y:3.9,w:2.1,h:.6,fontSize:32,bold:true,color:C.green,margin:0});
+    sl.addShape(pptx.ShapeType.roundRect,{x:.65,y:4.65,w:5.5,h:.28,rectRadius:.08,fill:{color:'E6EDF4'},line:{color:'E6EDF4'}});
+    if(rate>0)sl.addShape(pptx.ShapeType.roundRect,{x:.65,y:4.65,w:5.5*Math.min(100,rate)/100,h:.28,rectRadius:.08,fill:{color:C.green},line:{color:C.green}});
+    sl.addText('Indikator Pengusahaan',{x:7.0,y:3.45,w:4.5,h:.3,fontSize:14,bold:true,color:C.nav,margin:0});
+    sl.addText(Number(S.pengusahaan.rate||0).toLocaleString('id-ID',{maximumFractionDigits:1})+'%',{x:7.0,y:3.9,w:3.4,h:.6,fontSize:32,bold:true,color:C.blue,margin:0});
+    sl.addText('Target: '+fmt(S.pengusahaan.target||0)+'   •   Realisasi: '+fmt(S.pengusahaan.realisasi||0),{x:7.0,y:4.6,w:5.4,h:.25,fontSize:10,color:C.muted,margin:0});
+    sl.addShape(pptx.ShapeType.roundRect,{x:.65,y:5.55,w:12.05,h:.9,rectRadius:.08,fill:{color:'EAF2FB'},line:{color:'D9E7F5'}});
+    sl.addText('Catatan pembacaan',{x:.88,y:5.75,w:2.1,h:.2,fontSize:10,bold:true,color:C.blue2,margin:0});
+    sl.addText('Ringkasan ini mengikuti filter periode pada dashboard. Pastikan kelengkapan dan pembaruan input masing-masing bidang sebelum digunakan sebagai laporan resmi.',{x:3.0,y:5.72,w:9.2,h:.38,fontSize:10,color:C.ink,breakLine:false,margin:0,fit:'shrink'});
+  }
+  // 3. Division performance
+  {
+    const sl=pptx.addSlide();header(sl,'Kinerja per Bidang','Perbandingan jumlah pekerjaan dan tingkat penyelesaian tiap fungsi.');
+    const rows=divisions.map(([name,v])=>[name,String(v.total||0),String(v.selesai||0),String(v.proses||0),String(v.belum||0),(Number(v.rate||0)).toLocaleString('id-ID',{maximumFractionDigits:1})+'%']);
+    sl.addTable([['Bidang','Total','Selesai','Proses','Belum Selesai','Penyelesaian'],...rows],{x:.6,y:1.95,w:12.1,h:2.45,border:{type:'solid',color:C.line,pt:.7},fontFace:'Aptos',fontSize:11,color:C.ink,margin:.1,fill:C.white,autoFit:false,colW:[3.2,1.4,1.7,1.7,2.0,2.1],rowH:.43,headFill:C.nav,headColor:C.white,headFontSize:10,headBold:true,breakLine:false});
+    sl.addText('Progress penyelesaian',{x:.65,y:4.85,w:4,h:.3,fontSize:14,bold:true,color:C.nav,margin:0});
+    divisions.forEach(([name,v],i)=>{const y=5.35+i*.36,r=Number(v.rate||0);sl.addText(name,{x:.65,y,w:2.55,h:.18,fontSize:9,color:C.ink,margin:0});sl.addShape(pptx.ShapeType.roundRect,{x:3.15,y:y+.015,w:7.6,h:.16,rectRadius:.04,fill:{color:'E5ECF3'},line:{color:'E5ECF3'}});if(r>0)sl.addShape(pptx.ShapeType.roundRect,{x:3.15,y:y+.015,w:7.6*Math.min(100,r)/100,h:.16,rectRadius:.04,fill:{color:r>=80?C.green:r>=50?C.yellow:C.red},line:{color:r>=80?C.green:r>=50?C.yellow:C.red}});sl.addText(r.toFixed(1)+'%',{x:10.95,y,w:1.1,h:.18,fontSize:9,bold:true,color:C.ink,margin:0});});
+  }
+  // 4. Monthly trend
+  {
+    const sl=pptx.addSlide();header(sl,'Tren Kinerja Bulanan','Jumlah aktivitas tercatat menurut bulan untuk tahun yang dipilih.');
+    const tr=(D&&D.trend)||[];
+    const chartData=[{name:'Selesai',labels:tr.map(x=>x.label),values:tr.map(x=>Number(x.done||0))},{name:'Dalam Proses',labels:tr.map(x=>x.label),values:tr.map(x=>Number(x.process||0))},{name:'Tertunda',labels:tr.map(x=>x.label),values:tr.map(x=>Number(x.pending||0))}];
+    if(tr.length){
+      sl.addChart(pptx.ChartType.bar,chartData,{x:.75,y:1.95,w:11.8,h:4.3,catAxisLabelFontFace:'Aptos',catAxisLabelFontSize:10,valAxisLabelFontFace:'Aptos',valAxisLabelFontSize:9,showLegend:true,legendPos:'b',showTitle:false,showValue:false,showCatName:false,showValAxisTitle:false,showCatAxisTitle:false,showValAxis:true,showCatAxisLabel:true,showValAxisLabel:true,chartColors:[C.green,C.yellow,C.red],showBorder:false,showMarker:false,valGridLine:{color:C.line,pt:.7}});
+    }else sl.addText('Belum ada data tren untuk ditampilkan.',{x:1,y:3,w:10,h:.3,fontSize:14,color:C.muted,margin:0});
+    sl.addText('Catatan: grafik mengikuti data yang tersedia pada spreadsheet; bulan tanpa catatan akan bernilai nol.',{x:.8,y:6.45,w:11.6,h:.25,fontSize:9,color:C.muted,margin:0});
+  }
+  // 5. Latest activity
+  {
+    const sl=pptx.addSlide();header(sl,'Aktivitas Terbaru','Daftar aktivitas terbaru lintas bidang berdasarkan tanggal pencatatan.');
+    const latest=(D&&D.latest)||[];
+    const rows=latest.slice(0,10).map(r=>[String(r.tanggal||'-'),String(r.bidang||'-'),String(r.kegiatan||'-').slice(0,90),String(r.lokasi||'-').slice(0,55),String(r.status||'-')]);
+    sl.addTable([['Tanggal','Bidang','Kegiatan','Lokasi','Status'],...(rows.length?rows:[['-','-','Belum ada aktivitas','-','-']])],{x:.55,y:1.9,w:12.2,h:4.8,border:{type:'solid',color:C.line,pt:.6},fontFace:'Aptos',fontSize:9,color:C.ink,margin:.08,fill:C.white,autoFit:false,colW:[1.35,2.05,4.4,2.5,1.8],rowH:.4,headFill:C.nav,headColor:C.white,headFontSize:9,headBold:true,breakLine:false});
+  }
+  // 6. Pengusahaan summary
+  {
+    const sl=pptx.addSlide();header(sl,'Ringkasan Pengusahaan','Rekap indikator pengusahaan yang tersedia dari dashboard.');
+    const p=S.pengusahaan||{};
+    card(sl,.65,2.0,3.75,'Jumlah Data',p.total||0,C.blue);
+    card(sl,4.75,2.0,3.75,'Target',fmt(p.target||0),C.yellow);
+    card(sl,8.85,2.0,3.75,'Realisasi',fmt(p.realisasi||0),C.green);
+    sl.addText('Persentase realisasi terhadap target',{x:.75,y:3.65,w:6,h:.28,fontSize:14,bold:true,color:C.nav,margin:0});
+    const pr=Number(p.rate||0);
+    sl.addText(pr.toLocaleString('id-ID',{maximumFractionDigits:2})+'%',{x:.75,y:4.12,w:3.5,h:.65,fontSize:34,bold:true,color:pr>=100?C.green:pr>=80?C.yellow:C.red,margin:0});
+    sl.addShape(pptx.ShapeType.roundRect,{x:.75,y:5.0,w:11.75,h:.3,rectRadius:.08,fill:{color:'E5ECF3'},line:{color:'E5ECF3'}});
+    if(pr>0)sl.addShape(pptx.ShapeType.roundRect,{x:.75,y:5.0,w:11.75*Math.min(100,pr)/100,h:.3,rectRadius:.08,fill:{color:pr>=100?C.green:pr>=80?C.yellow:C.red},line:{color:pr>=100?C.green:pr>=80?C.yellow:C.red}});
+    sl.addText('Data pengusahaan bersifat informatif dan mengikuti ketersediaan data pada spreadsheet.',{x:.75,y:5.65,w:11.7,h:.28,fontSize:10,color:C.muted,margin:0});
+  }
+  function fmt(v){return Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:1})}
   const name='BRIGHT_ULP_EMPANG_'+new Date().toISOString().slice(0,10)+'.pptx';
-  try{if(window.AndroidBridge&&typeof window.AndroidBridge.savePpt==='function'){const base64=await pptx.write({outputType:'base64'});window.AndroidBridge.savePpt(base64,name);toast('PPT dikirim ke folder Download Android')}else{await pptx.writeFile({fileName:name});toast('PPT berhasil dibuat')}}catch(e){toast('Gagal membuat PPT: '+e.message)}
+  try{
+    if(window.AndroidBridge&&typeof window.AndroidBridge.savePpt==='function'){
+      const base64=await pptx.write({outputType:'base64'});
+      window.AndroidBridge.savePpt(base64,name);
+      toast('PPT 6 slide dikirim ke folder Download Android');
+    }else{
+      await pptx.writeFile({fileName:name});
+      toast('PPT 6 slide berhasil dibuat');
+    }
+  }catch(e){toast('Gagal membuat PPT: '+(e&&e.message?e.message:'error'))}
 }
 
 boot();
