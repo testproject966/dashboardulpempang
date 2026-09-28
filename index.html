@@ -426,7 +426,7 @@ function openInput(sheet){
   if(vals.some(v=>v===null))return;
   apiPost({api:'addRecord',sheet:meta[1],row:vals}).then(()=>{toast('Data berhasil dikirim');setTimeout(load,700)}).catch(e=>toast('Gagal: '+e.message));
 }
-async async function downloadPPT(){
+async async async function downloadPPT(){
   if(typeof pptxgen==='undefined'&&typeof pptxgenjs==='undefined'){toast('Library PPT belum siap, coba muat ulang halaman');return}
   const P=typeof pptxgen!=='undefined'?pptxgen:pptxgenjs,pptx=new P();
   pptx.layout='LAYOUT_WIDE';pptx.author='PLN ULP Empang';pptx.subject='Laporan Kinerja PLN ULP Empang';pptx.title='BRIGHT ULP EMPANG';
