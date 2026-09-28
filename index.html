@@ -241,7 +241,22 @@ function module(m){
  render();
 }
 function f(){return{year:document.getElementById('year').value,month:document.getElementById('month').value,status:document.getElementById('status').value}}
-function apiGet(params){return new Promise((resolve,reject)=>{const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const s=document.createElement('script');const q=new URLSearchParams(params||{});q.set('callback',cb);window[cb]=d=>{delete window[cb];s.remove();resolve(d)};s.onerror=()=>{delete window[cb];s.remove();reject(new Error('API tidak dapat diakses'))};s.src='https://script.google.com/macros/s/AKfycbysDV8suT1MBJF8LiX4zxNHUzZdnP9FT9BpnaI01QjnFDznRIFyZlPSD-5kRb5k0TL_aQ/exec?'+q.toString();document.head.appendChild(s)})}
+function apiGet(params){return new Promise((resolve,reject)=>{
+ const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+ const script=document.createElement('script');
+ const q=new URLSearchParams(params||{});
+ let settled=false;
+ const cleanup=()=>{delete window[cb];script.onerror=null;script.onload=null;script.remove();clearTimeout(timer)};
+ const fail=message=>{if(settled)return;settled=true;cleanup();reject(new Error(message))};
+ const timer=setTimeout(()=>fail('Waktu tunggu API habis. Periksa deployment Apps Script dan akses Web App.'),18000);
+ q.set('callback',cb);
+ q.set('_',String(Date.now()));
+ window[cb]=data=>{if(settled)return;settled=true;cleanup();resolve(data)};
+ script.onerror=()=>fail('Apps Script tidak mengembalikan JSONP. Kemungkinan versi Web App belum diperbarui. Buka Apps Script → Deploy → Manage deployments → Edit → New version → Deploy; pastikan akses Web App sesuai.');
+ script.onload=()=>{setTimeout(()=>{if(!settled&&!window[cb])fail('Respons API tidak valid. Periksa versi deployment Apps Script.');},250)};
+ script.src='https://script.google.com/macros/s/AKfycbysDV8suT1MBJF8LiX4zxNHUzZdnP9FT9BpnaI01QjnFDznRIFyZlPSD-5kRb5k0TL_aQ/exec?'+q.toString();
+ document.head.appendChild(script);
+})}
 async function apiData(){return apiGet({api:'getData'})}
 async function load(){try{const d=await apiData();D=d;fill();document.getElementById('updated').textContent='Data diperbarui '+(d.updated||'');uName.textContent=(d.user&&d.user.nama)||'Pengguna';uRole.textContent=((d.user&&d.user.role)||'VIEWER')+' • '+((d.user&&d.user.bidang)||'Semua');render()}catch(e){toast('Gagal: '+e.message)}}
 function fill(){
@@ -354,7 +369,7 @@ function loadPengusahaanSub(m){
   if(!rows.length)tableHtml='<div class="empty">Belum ada data pada sheet '+titles[m]+'.</div>';
   else{const keys=Object.keys(rows[0]);tableHtml='<div class="data-table-wrap"><table><thead><tr>'+keys.map(k=>'<th>'+esc(k)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+keys.map(k=>'<td>'+esc(r[k]??'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
   content.innerHTML=summary+'<div class="data-panel"><h3>'+titles[m]+'</h3>'+tableHtml+'</div>';
- }).catch(e=>{content.innerHTML='<div class="data-panel"><div class="empty">Gagal memuat data: '+esc(e.message)+'</div></div>'});
+ }).catch(e=>{content.innerHTML='<div class="data-panel"><div class="empty">⚠ '+esc(e.message)+'<br><br><a href="https://script.google.com/home" target="_blank" rel="noopener" style="color:#0878b9;font-weight:700">Buka Google Apps Script untuk memperbarui deployment</a></div></div>'});
 }
 function renderSupportRoute(m){
  setHeroMode('module',m==='pendukung'?'PENDUKUNG':({database:'DATABASE',upload:'UPLOAD & VALIDASI',export:'EXPORT DATA',system:'STATUS SISTEM'}[m]||'PENDUKUNG'),'Pengelolaan data • BRIGHT ULP EMPANG');
