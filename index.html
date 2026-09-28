@@ -276,7 +276,24 @@ function apiGet(params){return new Promise((resolve,reject)=>{
  document.head.appendChild(script);
 })}
 async function apiData(){return apiGet({api:'getData'})}
-async function load(){try{const d=await apiData();D=d;fill();document.getElementById('updated').textContent='Data diperbarui '+(d.updated||'');uName.textContent=(d.user&&d.user.nama)||'Pengguna';uRole.textContent=((d.user&&d.user.role)||'VIEWER')+' • '+((d.user&&d.user.bidang)||'Semua');render()}catch(e){toast('Gagal: '+e.message)}}
+async function load(){
+ const host=document.getElementById('content');
+ try{
+  if(host)host.innerHTML='<div class="data-panel"><div class="empty">Menghubungkan ke Google Spreadsheet…<br><small>Jika koneksi lambat, status akan ditampilkan di sini.</small></div></div>';
+  const d=await apiData();
+  if(d&&d.ok===false)throw new Error(d.error||'Apps Script mengembalikan kesalahan.');
+  if(!d||!d.summary||!d.rows)throw new Error('Struktur respons API tidak sesuai. Periksa versi deployment Apps Script.');
+  D=d;fill();
+  const updated=document.getElementById('updated');if(updated)updated.textContent='Data diperbarui '+(d.updated||'');
+  if(typeof uName!=='undefined'&&uName)uName.textContent=(d.user&&d.user.nama)||'Pengguna';
+  if(typeof uRole!=='undefined'&&uRole)uRole.textContent=((d.user&&d.user.role)||'VIEWER')+' • '+((d.user&&d.user.bidang)||'Semua');
+  render();
+ }catch(e){
+  const msg=String(e&&e.message||e||'Kesalahan tidak diketahui');
+  if(host)host.innerHTML='<div class="data-panel"><div class="pro-empty"><span>⚠</span><b>Koneksi data belum berhasil</b><small>'+esc(msg)+'</small><small>Pastikan Web App Apps Script sudah di-deploy sebagai versi terbaru dan aksesnya diatur untuk pengguna yang membuka dashboard.</small><button class="pro-outline-btn" style="margin-top:12px" onclick="load()">↻ Coba Hubungkan Lagi</button><a class="pro-outline-btn" style="display:inline-flex;margin:12px 0 0 8px" target="_blank" rel="noopener" href="'+API_URL+'?api=getData">Uji API</a></div></div>';
+  toast('Dashboard belum terhubung ke API Google Spreadsheet.');
+ }
+}
 function fill(){
  if(year.options.length===1)(D.years||[]).forEach(x=>year.add(new Option(x,x)));
  if(month.options.length===1)(D.months||[]).slice(1).forEach(x=>month.add(new Option(x.t,x.v)));
