@@ -16,6 +16,12 @@
  * - Input & edit data
  *******************************************************/
 
+const DB_SPREADSHEET_ID = '1UmBR6Um7WuF8CwsKCxnwVa1tKjyGTyzKxurUBy_b5fo';
+
+function db_(){
+  return SpreadsheetApp.openById(DB_SPREADSHEET_ID);
+}
+
 const CFG = {
   UNIT: 'PLN ULP EMPANG',
   PARENT: 'PLN UP3 SUMBAWA',
@@ -89,7 +95,7 @@ function apiSheetName_(name){
 function appendRows(sheetName,rows){
   const name=apiSheetName_(sheetName);
   if(!Array.isArray(rows)||!rows.length) return {count:0,sheet:name};
-  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  const ss=db_();
   let sh=ss.getSheetByName(name);
   if(!sh) sh=ss.insertSheet(name);
   const existingHeaders=sh.getLastColumn()>0&&sh.getLastRow()>0?sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0]:[];
@@ -107,7 +113,7 @@ function appendRows(sheetName,rows){
 
 function addRecord(sheetName,row){
   const name=apiSheetName_(sheetName);
-  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  const ss=db_();
   let sh=ss.getSheetByName(name);
   if(!sh) sh=ss.insertSheet(name);
   if(sh.getLastColumn()===0){
@@ -126,7 +132,7 @@ function jsonp_(data,callback){
 }
 
 function setupDatabase(){
-  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  const ss=db_();
   Object.keys(SCHEMA).forEach(name=>{
     let sh=ss.getSheetByName(name);
     if(!sh) sh=ss.insertSheet(name);
@@ -284,7 +290,7 @@ function getModule(bidang,filters){
 
 function saveRecord(p){
   const map={teknik:CFG.SHEETS.TEKNIK,transaksi:CFG.SHEETS.TRANSAKSI,pelayanan:CFG.SHEETS.PELAYANAN,k3l:CFG.SHEETS.K3L,pengusahaan:CFG.SHEETS.PENGUSAHAAN};
-  const sh=SpreadsheetApp.getActive().getSheetByName(map[p.bidang]);
+  const sh=db_().getSheetByName(map[p.bidang]);
   if(!sh)throw new Error('Sheet tidak ditemukan.');
   const h=sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0];
   const row=h.map(x=>p.values[x]??'');
@@ -383,7 +389,7 @@ function getPengusahaanDashboard(filters){
 }
 
 function getSheet_(name){
-  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
+  return db_().getSheetByName(name);
 }
 
 function filterPengusahaanPeriod_(rows,f){
@@ -465,7 +471,7 @@ function asetSummary_(rows){
 }
 
 function read_(name){
-  const sh=SpreadsheetApp.getActive().getSheetByName(name);
+  const sh=db_().getSheetByName(name);
   if(!sh||sh.getLastRow()<2)return [];
   const a=sh.getDataRange().getValues(),h=a.shift();
   return a.filter(r=>r.some(v=>v!==''&&v!==null)).map(r=>{
@@ -502,7 +508,7 @@ function seedDemo_(){
     ]
   };
   Object.keys(samples).forEach(n=>{
-    const sh=SpreadsheetApp.getActive().getSheetByName(n);
+    const sh=db_().getSheetByName(n);
     if(sh&&sh.getLastRow()===1)sh.getRange(2,1,samples[n].length,samples[n][0].length).setValues(samples[n]);
   });
 }
