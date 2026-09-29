@@ -178,7 +178,7 @@ body{background:linear-gradient(135deg,#eaf4f7,#dfeef3);color:var(--ink)}
 </aside>
 <main class="main">
  <header class="top">
-  <div class="brand-line"><button class="mobile" onclick="toggleSide()">☰</button><strong>PLN ULP EMPANG — BRIGHT DASHBOARD</strong><span class="live"><i></i> LIVE GITHUB</span><span class="load-pill" id="updated">Memuat...</span></div>
+  <div class="brand-line"><button class="mobile" onclick="toggleSide()">☰</button><strong>PLN ULP EMPANG — BRIGHT DASHBOARD</strong><span class="live"><i></i> LIVE GITHUB</span><button class="load-pill" id="apiHealthBtn" type="button" onclick="checkApiHealth()" title="Periksa koneksi Google Apps Script dan Spreadsheet">API: CEK KONEKSI</button><span class="load-pill" id="updated">Memuat...</span></div>
   <small class="brand-right">BRIGHT ULP EMPANG</small>
  </header>
  <section class="content">
@@ -275,6 +275,23 @@ function apiGet(params){return new Promise((resolve,reject)=>{
  script.src='https://script.google.com/macros/s/AKfycbysDV8suT1MBJF8LiX4zxNHUzZdnP9FT9BpnaI01QjnFDznRIFyZlPSD-5kRb5k0TL_aQ/exec?'+q.toString();
  document.head.appendChild(script);
 })}
+async function checkApiHealth(){
+ const btn=document.getElementById('apiHealthBtn');
+ if(btn){btn.textContent='API: MEMERIKSA…';btn.disabled=true}
+ try{
+  const r=await apiGet({api:'health'});
+  if(!r||r.ok!==true)throw new Error((r&&r.error)||'Respons health check tidak valid.');
+  const sheets=Array.isArray(r.sheets)?r.sheets:[];
+  const records=sheets.reduce((n,x)=>n+(Number(x.rows)||0),0);
+  if(btn){btn.textContent='API: TERHUBUNG';btn.title=(r.spreadsheet||'Spreadsheet')+' • '+sheets.length+' sheet • '+records+' record';btn.style.background='#e7f7ed';btn.style.color='#177245'}
+  toast('API terhubung • '+(r.spreadsheet||'Spreadsheet')+' • '+sheets.length+' sheet • '+records+' record');
+  return r;
+ }catch(e){
+  if(btn){btn.textContent='API: GAGAL';btn.title=String(e.message||e);btn.style.background='#fff0ed';btn.style.color='#b42318'}
+  toast('Pemeriksaan API gagal: '+(e.message||e));
+  return null;
+ }finally{if(btn)btn.disabled=false}
+}
 async function apiData(){return apiGet({api:'getData'})}
 async function load(){
  const host=document.getElementById('content');
