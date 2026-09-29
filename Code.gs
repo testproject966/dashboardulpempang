@@ -51,6 +51,11 @@ function doGet(e){
   const p=(e&&e.parameter)||{};
   try{
     // API untuk GitHub Pages / Android. Backend dan Spreadsheet tetap di Apps Script.
+    if(String(p.api||'')==='health'){
+      const ss=db_();
+      const sheets=ss.getSheets().map(sh=>({name:sh.getName(),rows:Math.max(0,sh.getLastRow()-1),columns:sh.getLastColumn()}));
+      return jsonp_({ok:true,service:'BRIGHT ULP EMPANG API',spreadsheet:ss.getName(),checkedAt:Utilities.formatDate(new Date(),CFG.TZ,'yyyy-MM-dd HH:mm:ss'),sheets:sheets},p.callback);
+    }
     if(String(p.api||'')==='getData'){
       const d=getExecutive({year:p.year||'',month:p.month||'',status:p.status||''});
       return jsonp_(d,p.callback);
