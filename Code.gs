@@ -434,18 +434,45 @@ function periodFromText_(v){
 function numPeng_(v){
   if(v===null||v===undefined||v==='')return 0;
   if(typeof v==='number')return isFinite(v)?v:0;
-  let s=String(v).trim().replace(/\s/g,'');
+  let s=String(v).trim().replace(/[\\s\\u00a0]/g,'');
   if(!s)return 0;
-  s=s.replace(/%/g,'');
-  if(s.indexOf(',')>=0 && s.indexOf('.')>=0){
-    s=s.replace(/\./g,'').replace(',','.');
-  }else if(s.indexOf(',')>=0){
-    s=s.replace(',','.');
-  }else if((s.match(/\./g)||[]).length>1){
-    s=s.replace(/\./g,'');
+  let negative=false;
+  if(/^\\(.*\\)$/.test(s)){negative=true;s=s.slice(1,-1);}
+  s=s.replace(/%/g,'').replace(/^(Rp|IDR)/i,'').replace(/[^0-9,.-]/g,'');
+  if(!s)return 0;
+  const commas=(s.match(/,/g)||[]).length;
+  const dots=(s.match(/\\./g)||[]).length;
+  if(commas&&dots){
+    // Separator paling kanan diperlakukan sebagai desimal; separator lainnya adalah pemisah ribuan.
+    const decimal=s.lastIndexOf(',')>s.lastIndexOf('.')?',':'.';
+    const group=decimal===','?'.':',';
+    s=s.split(group).join('');
+    if(decimal===',')s=s.replace(/,/g,'.');
+  }else if(commas||dots){
+    const sep=commas?',':'.';
+    const parts=s.split(sep);
+    if(parts.length>2){
+      const last=parts[parts.length-1];
+      if(last.length===1||last.length===2){
+        s=parts.slice(0,-1).join('')+'.'+last;
+      }else if(parts.slice(1).every(part=>part.length===3)){
+        s=parts.join('');
+      }else{
+        s=parts.slice(0,-1).join('')+'.'+last;
+      }
+    }else{
+      const left=parts[0].replace(/^[+-]/,'');
+      const right=parts[1]||'';
+      if(right.length===3&&left.length>=1&&left.length<=3){
+        s=parts.join('');
+      }else{
+        s=parts[0]+'.'+right;
+      }
+    }
   }
-  const n=Number(s.replace(/[^0-9.\-]/g,''));
-  return isFinite(n)?n:0;
+  const n=Number(s);
+  if(!isFinite(n))return 0;
+  return negative?-n:n;
 }
 
 function latestPenjualan_(rows){
