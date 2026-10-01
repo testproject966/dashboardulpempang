@@ -578,6 +578,20 @@ function loadPengusahaanSub(m){
   renderBusinessSubTable();
  }).catch(e=>{content.innerHTML='<div class="pro-welcome"><div><div class="pro-eyebrow">DATA EXPLORER / PENGUSAHAAN</div><h2>'+titles[m]+'</h2><p>'+descriptions[m]+'</p></div><div class="pro-period"><small>STATUS DATASET</small><strong>API BELUM TERHUBUNG</strong><span>Perlu pemeriksaan backend</span></div></div><div class="pro-error-card"><span class="pro-error-icon">!</span><div><h3>Data belum dapat dimuat</h3><p>'+esc(e.message)+'</p><small>Periksa deployment Google Apps Script, akses Web App, dan fungsi getPengusahaanDashboard. Tampilan dan database tidak diubah oleh pesan ini.</small><div class="pro-error-actions"><button class="pro-outline-btn" onclick="loadPengusahaanSub(\''+m+'\')">Coba Lagi</button><a href="https://script.google.com/home" target="_blank" rel="noopener">Buka Apps Script →</a></div></div></div>'});
 }
+function visibleDatasetKeys(rows){
+ const raw=rows&&rows.length?Object.keys(rows[0]):[];
+ const seen=new Set();
+ return raw.filter(k=>{
+  const label=String(k??'').trim();
+  const norm=label.toLocaleLowerCase('id-ID').replace(/[._\s-]+/g,'');
+  // Kolom nomor urut dari spreadsheet tidak ditampilkan karena tabel sudah menyediakan nomor baris sendiri.
+  // Kolom bisnis seperti Nomor Meter tetap tampil.
+  if(['no','nomorurut','nourut','nomorurutan','rownum','rownumber'].includes(norm))return false;
+  if(seen.has(norm))return false;
+  seen.add(norm);
+  return true;
+ });
+}
 function renderBusinessSubTable(){
  const rows=window.__brightSubRows||[];
  const box=document.getElementById('businessSubTableBody');
@@ -587,7 +601,7 @@ function renderBusinessSubTable(){
  const count=document.getElementById('businessTableCount');
  if(count)count.textContent=filtered.length.toLocaleString('id-ID')+' dari '+rows.length.toLocaleString('id-ID')+' record';
  if(!filtered.length){box.innerHTML='<div class="pro-empty compact"><span>⌕</span><b>'+(rows.length?'Tidak ada hasil pencarian':'Belum ada data pada dataset ini')+'</b><small>'+(rows.length?'Coba kata kunci yang berbeda.':'Isi spreadsheet sumber, lalu tekan Refresh.')+'</small></div>';return}
- const keys=Object.keys(filtered[0]);
+ const keys=visibleDatasetKeys(filtered);
  box.innerHTML='<div class="data-table-wrap pro-table-wrap"><table class="pro-table"><thead><tr><th class="row-number">NO.</th>'+keys.map(k=>'<th>'+esc(k)+'</th>').join('')+'</tr></thead><tbody>'+filtered.map((r,i)=>'<tr><td class="row-number">'+(i+1).toLocaleString('id-ID')+'</td>'+keys.map(k=>'<td title="'+esc(r[k]??'')+'">'+esc(r[k]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
 }
 function renderSupportRoute(m){
