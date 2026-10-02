@@ -615,12 +615,18 @@ function loadPengusahaanSub(m){
 function visibleDatasetKeys(rows){
  const raw=rows&&rows.length?Object.keys(rows[0]):[];
  const seen=new Set();
- return raw.filter(k=>{
+ return raw.filter((k,index)=>{
   const label=String(k??'').trim();
-  const norm=label.toLocaleLowerCase('id-ID').replace(/[._\s-]+/g,'');
-  // Kolom nomor urut dari spreadsheet tidak ditampilkan karena tabel sudah menyediakan nomor baris sendiri.
-  // Kolom bisnis seperti Nomor Meter tetap tampil.
-  if(['no','nomorurut','nourut','nomorurutan','rownum','rownumber'].includes(norm))return false;
+  const norm=label.toLocaleLowerCase('id-ID').replace(/[^a-z0-9]/g,'');
+  // Tabel sudah memiliki kolom nomor baris sendiri. Hilangkan kolom nomor urut sumber
+  // (No, No., NO, Nomor Urut) dan duplikat header tanpa menghilangkan Nomor Meter.
+  const isSequenceHeader=['no','nomorurut','nourut','nomorurutan','rownum','rownumber','nomorbaris'].includes(norm);
+  const values=rows.map(r=>r[k]);
+  const isSequential=index===0 && values.length>0 && values.every((v,i)=>{
+    const n=numericValueForDisplay_(v);
+    return n!==null && n===i+1;
+  });
+  if(isSequenceHeader||isSequential)return false;
   if(seen.has(norm))return false;
   seen.add(norm);
   return true;
@@ -802,7 +808,10 @@ function barList_(arr,titleText){
 function pengusahaanPenjualanTable(rows){
   if(!rows.length)return'<div class="empty">Belum ada data penjualan.</div>';
   const cols=['BULAN','JUMLAH PELANGGAN','DAYA TERSAMBUNG','PENJUALAN (KWH)','RP PENDAPATAN','GROWTH KWH YOY'];
-  return `<div style="overflow:auto"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rows.slice().reverse().slice(0,24).map(r=>`<tr>${cols.map(c=>`<td>${esc(r[c]??'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  // Selalu gunakan formatter yang sama dengan tabel detail agar nilai dari Spreadsheet
+  // yang tersimpan sebagai angka maupun teks berformat (1,234.56 / 1.234,56)
+  // tampil konsisten dengan format Indonesia: 1.234,56.
+  return `<div style="overflow:auto"><table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.slice().reverse().slice(0,24).map(r=>`<tr>${cols.map(c=>`<td>${esc(formatSourceCell_(r[c],c))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 
 function peKpi(icon,label,value,sub){
