@@ -885,12 +885,13 @@ function formatSourceCell_(value,key){
  if(!isNumericDataColumn_(key))return raw;
  const n=numericValueForDisplay_(value);
  if(n===null)return raw;
- // Standarisasi seluruh angka Spreadsheet ke format Indonesia: ribuan titik, desimal koma. Nilai sumber tidak diubah.
+ // Standarisasi angka Spreadsheet: ribuan titik, desimal koma. Nilai sumber tidak diubah.
  const formatted=n.toLocaleString('id-ID',{minimumFractionDigits:0,maximumFractionDigits:2});
- const isPercent=/%/.test(raw)||/(persentase|persen|growth|yoy)/i.test(label);
- const isCurrency=/^(rp\\b|idr\\b)/i.test(raw)||/(^rp\\b|pendapatan|revenue)/i.test(label);
+ const isPercent=raw.includes('%')||label.includes('persentase')||label.includes('persen')||label.includes('growth')||label.includes('yoy');
+ const rawLower=raw.toLocaleLowerCase('id-ID');
+ const isCurrency=rawLower.startsWith('rp')||rawLower.startsWith('idr')||label.startsWith('rp')||label.includes('pendapatan')||label.includes('revenue');
  const valueText=isPercent?formatted+'%':formatted;
- return isCurrency&&!/^(rp\\b|idr\\b)/i.test(valueText)?'Rp '+valueText:valueText;
+ return isCurrency?'Rp '+valueText:valueText;
 }
 function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function toast(t){const x=document.getElementById('toast');x.textContent=t;x.classList.remove('hidden');setTimeout(()=>x.classList.add('hidden'),2500)}
