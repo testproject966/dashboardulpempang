@@ -60,6 +60,13 @@ function doGet(e){
       const d=getExecutive({year:p.year||'',month:p.month||'',status:p.status||''});
       return jsonp_(d,p.callback);
     }
+    if(String(p.api||'')==='getHeaders'){
+      const name=apiSheetName_(String(p.sheet||''));
+      const sh=db_().getSheetByName(name);
+      if(!sh) throw new Error('Sheet tidak ditemukan: '+name);
+      const headers=sh.getLastColumn()?sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0].map(x=>String(x||'')):[];
+      return jsonp_({ok:true,sheet:name,headers:headers},p.callback);
+    }
     if(String(p.api||'')==='getModule'){
       const filters={year:p.year||'',month:p.month||'',status:p.status||''};
       const rows=getModule(String(p.bidang||''),filters);
