@@ -839,8 +839,9 @@ function shortMonth_(s){
 
 function table(m,r){
  if(!r.length)return'<div class="empty">Tidak ada data untuk filter yang dipilih.</div>';
- const c={teknik:['ID','Tanggal','Penyulang','Lokasi','Jenis Pekerjaan','Status','Petugas'],transaksi:['ID','Tanggal','ID Pelanggan','Nomor Meter','Merk Meter','Kegiatan','Status','Petugas'],pelayanan:['ID','Tanggal','ID Pelanggan','Jenis Pelayanan','Nama Pelanggan','Status','Petugas'],k3l:['ID','Tanggal','Kegiatan','Lokasi','Status','Temuan','Tindak Lanjut'],pengusahaan:['ID','Tanggal','Indikator','Target','Realisasi','Satuan','Persentase']}[m];
- return`<div style="overflow:auto"><table><thead><tr>${c.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${r.slice(0,200).map(x=>`<tr>${c.map(y=>`<td>${y==='Status'?badge(x[y]):esc(formatSourceCell_(x[y],y))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+ const preferred={teknik:['ID','Tanggal','Penyulang','Lokasi','Jenis Pekerjaan','Status','Petugas'],transaksi:['ID','Tanggal','ID Pelanggan','Nomor Meter','Merk Meter','Kegiatan','Status','Petugas'],pelayanan:['ID','Tanggal','ID Pelanggan','Jenis Pelayanan','Nama Pelanggan','Status','Petugas'],k3l:['No','Bulan','Tahun'],pengusahaan:['ID','Tanggal','Indikator','Target','Realisasi','Satuan','Persentase']}[m]||[];
+ const keys=Object.keys(r[0]||{}); const c=[...preferred.filter(k=>keys.includes(k)),...keys.filter(k=>!preferred.includes(k))];
+ return'<div class="data-table-wrap"><table><thead><tr>'+c.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+r.slice(0,500).map(x=>'<tr>'+c.map(y=>'<td>'+((String(y).toLowerCase()==='status')?badge(x[y]):esc(formatSourceCell_(x[y],y)))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
 }
 function badge(s){const l=String(s||'').toLowerCase();let c=l.includes('selesai')?'bg':l.includes('proses')?'by':l.includes('belum')?'br':'bb';return`<span class="badge ${c}">${esc(s||'-')}</span>`}
 function fmt(n){return Number(n||0).toLocaleString('id-ID')}
@@ -945,12 +946,16 @@ async function uploadBatches(groups){
   }
   setProgress(100,'Upload selesai — memuat data terbaru');setTimeout(load,700);
 }
-function openInput(sheet){
-  const meta={teknik:['Teknik Jaringan','teknik'],transaksi:['Transaksi Energi','transaksi'],pelayanan:['Pelayanan Pelanggan','pelayanan'],k3l:['K3L','k3l'],pengusahaan:['Pengusahaan','pengusahaan'],KPI:['KPI','KPI']}[sheet||'KPI'];
-  const fields={KPI:['Tanggal','Bidang','Indikator','Satuan','Target','Realisasi','Catatan'],teknik:['Tanggal','Penyulang','Lokasi','Jenis Pekerjaan','Status','Petugas','Keterangan'],transaksi:['Tanggal','ID Pelanggan','Nomor Meter','Merk Meter','Kegiatan','Status','Petugas'],pelayanan:['Tanggal','ID Pelanggan','Jenis Pelayanan','Nama Pelanggan','Status','Petugas'],k3l:['Tanggal','Kegiatan','Lokasi','Status','Temuan','Tindak Lanjut','Petugas'],pengusahaan:['Tanggal','Indikator','Target','Realisasi','Satuan','Persentase','Keterangan']}[sheet||'KPI'];
-  const vals=fields.map(x=>prompt('Input '+x+(x==='Tanggal'?' (YYYY-MM-DD)':''),x==='Tanggal'?new Date().toISOString().slice(0,10):''));
-  if(vals.some(v=>v===null))return;
-  apiPost({api:'addRecord',sheet:meta[1],row:vals}).then(()=>{toast('Data berhasil dikirim');setTimeout(load,700)}).catch(e=>toast('Gagal: '+e.message));
+async function openInput(sheet){
+ const meta={teknik:['Teknik Jaringan','teknik'],transaksi:['Transaksi Energi','transaksi'],pelayanan:['Pelayanan Pelanggan','pelayanan'],k3l:['K3L','k3l'],pengusahaan:['Pengusahaan','pengusahaan'],KPI:['KPI','KPI']}[sheet||'KPI'];
+ if(!meta){toast('Sheet input tidak dikenali');return}
+ try{
+  const r=await apiGet({api:'getHeaders',sheet:meta[1]});
+  if(!r||!r.ok||!Array.isArray(r.headers)||!r.headers.length)throw new Error('Header sheet tidak tersedia.');
+  const headers=r.headers.filter(Boolean),values=[];
+  for(const field of headers){let hint='';const low=String(field).toLowerCase();if(low.includes('tanggal')||low.includes('date'))hint=' (YYYY-MM-DD)';else if(low.includes('bulan'))hint=' (contoh: Januari)';else if(low.includes('tahun'))hint=' (contoh: 2026)';const v=prompt('Input '+field+hint,'');if(v===null)return;values.push(v)}
+  apiPost({api:'addRecord',sheet:meta[1],row:values}).then(()=>{toast('Data berhasil dikirim ke '+meta[0]);setTimeout(load,700)}).catch(e=>toast('Gagal: '+e.message));
+ }catch(e){toast('Header '+meta[0]+' gagal dibaca: '+e.message)}
 }
 async function downloadPPT(){
   if(typeof pptxgen==='undefined'&&typeof pptxgenjs==='undefined'){toast('Library PPT belum siap, coba muat ulang halaman');return}
