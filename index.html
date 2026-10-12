@@ -209,6 +209,11 @@ table{border-collapse:separate;border-spacing:0;width:100%;border:1px solid #dce
 @media(max-width:1250px){.side{width:244px}.main{margin-left:244px}.content{padding:22px 20px 40px}}
 @media(max-width:720px){.side{width:260px}.main{margin-left:0}.top{padding:0 13px}.brand-line strong{font-size:11px}.brand-right{display:none}.content{padding:13px 12px 30px}.hero{padding:23px 19px;min-height:0;border-radius:19px}.hero h2{font-size:27px}.hero-actions{gap:7px}.hero-btn{padding:9px 10px;font-size:9px}.upload-strip{align-items:flex-start;gap:9px}.file-tags{gap:4px}.kpis{gap:9px}.kpi,.pe-kpi{padding:13px;border-radius:15px}.panel{padding:14px;border-radius:15px}}
 
+
+/* K3L-only readable indicators and source percentage normalization */
+.k3l-module-head{align-items:flex-start!important;gap:14px}.k3l-module-head>div:nth-child(2){min-width:0;flex:1}.k3l-subnote{display:block;margin-top:7px;font-size:10px;color:#62859a;line-height:1.5}.k3l-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.k3l-data-panel .head{align-items:flex-start;gap:16px}.k3l-data-panel .head>div{min-width:0}.k3l-data-panel .head h3{margin:0 0 6px}.k3l-table-help{margin:0;color:#7795a6;font-size:10px;line-height:1.6;max-width:720px}.k3l-table-wrap{max-width:100%;overflow:auto;border:1px solid #dceaf0;border-radius:12px;overscroll-behavior-x:contain}.k3l-table{width:max-content;min-width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0}.k3l-table th,.k3l-table td{white-space:normal;overflow-wrap:anywhere;word-break:normal;vertical-align:top;line-height:1.55;padding:12px 13px;min-width:115px;max-width:280px}.k3l-table th{position:sticky;top:0;z-index:2;background:#eaf5f9;color:#225c77;font-size:10px;font-weight:800;letter-spacing:.15px;text-transform:none}.k3l-table th:nth-child(1),.k3l-table td:nth-child(1){min-width:58px;width:58px;max-width:58px;text-align:center}.k3l-table th:nth-child(2),.k3l-table td:nth-child(2){min-width:110px;width:110px;max-width:110px}.k3l-table th:nth-child(3),.k3l-table td:nth-child(3){min-width:78px;width:78px;max-width:78px}.k3l-table th:nth-child(n+4),.k3l-table td:nth-child(n+4){min-width:235px;width:235px;max-width:280px}.k3l-table td:nth-child(n+4){font-variant-numeric:tabular-nums;color:#176c8f}.k3l-table tbody tr:hover td{background:#f0fafc}.k3l-table td[title]{cursor:default}
+@media(max-width:900px){.k3l-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.k3l-module-head{flex-wrap:wrap}.k3l-module-head .actions{width:100%;display:flex;gap:8px;flex-wrap:wrap}.k3l-table th,.k3l-table td{padding:10px}.k3l-table th:nth-child(n+4),.k3l-table td:nth-child(n+4){min-width:200px;width:200px}}
+@media(max-width:520px){.k3l-kpis{grid-template-columns:1fr 1fr}.k3l-kpis .kpi{min-width:0}.k3l-kpis .val{font-size:19px}.k3l-table th:nth-child(n+4),.k3l-table td:nth-child(n+4){min-width:180px;width:180px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -674,10 +679,28 @@ function notices(a){if(!a.length)return'<div class="empty">Belum ada informasi.<
 function latest(a){if(!a.length)return'<div class="empty">Belum ada aktivitas.</div>';return`<div style="overflow:auto"><table><thead><tr><th>Tanggal</th><th>Bidang</th><th>Kegiatan</th><th>Lokasi</th><th>Status</th></tr></thead><tbody>${a.map(x=>`<tr><td>${x.tanggal}</td><td>${x.bidang}</td><td>${esc(x.kegiatan)}</td><td>${esc(x.lokasi)}</td><td>${badge(x.status)}</td></tr>`).join('')}</tbody></table></div>`}
 function mod(m){
   if(m==='pengusahaan'){pengusahaanDashboard();return;}
-  const meta={teknik:['🔧','Teknik Jaringan','Monitoring pekerjaan dan kondisi jaringan'],transaksi:['⚡','Transaksi Energi','Monitoring meter dan transaksi energi'],pelayanan:['👥','Pelayanan Pelanggan','Monitoring pelayanan dan pengaduan'],k3l:['🦺','K3L','Safety, inspeksi, temuan dan tindak lanjut']}[m];
+  const meta={teknik:['🔧','Teknik Jaringan','Monitoring pekerjaan dan kondisi jaringan'],transaksi:['⚡','Transaksi Energi','Monitoring meter dan transaksi energi'],pelayanan:['👥','Pelayanan Pelanggan','Monitoring pelayanan dan pengaduan'],k3l:['🦺','K3L','Monitoring realisasi program, inspeksi, kepatuhan dan kegiatan K3L']}[m];
   title.textContent=meta[1];sub.textContent=meta[2];
   apiGet({api:'getModule',bidang:m,year:year.value,month:month.value,status:status.value}).then(rows=>{
    const ss=D.summary[m];
+   if(m==='k3l'){
+    const keys=Object.keys(rows[0]||{});
+    const pctKeys=keys.filter((key,i)=>i>=3&&!/^(no|bulan|tahun|tanggal|id|keterangan|catatan|lokasi|petugas|nama|status)$/i.test(String(key).trim())&&!/keterangan|catatan|lokasi|petugas|nama|status/i.test(String(key)));
+    const pctVals=[];
+    rows.forEach(r=>pctKeys.forEach(key=>{
+      const raw=r[key];if(raw===null||raw===undefined||String(raw).trim()==='')return;
+      const n=numericValueForDisplay_(raw);if(n===null)return;
+      const v=(String(raw).includes('%')||n>1)?n:n*100;
+      pctVals.push(Math.max(0,Math.min(100,v)));
+    }));
+    const avg=pctVals.length?pctVals.reduce((a,b)=>a+b,0)/pctVals.length:0;
+    const filledRows=rows.filter(r=>String(r.Bulan??r.BULAN??'').trim()!==''&&String(r.Tahun??r.TAHUN??'').trim()!=='').length;
+    const monthCount=new Set(rows.map(r=>String(r.Bulan??r.BULAN??'').trim()).filter(Boolean)).size;
+    content.innerHTML=`<div class="moduleHead k3l-module-head"><div class="mi">${meta[0]}</div><div><h2>${meta[1]}</h2><p>${meta[2]}</p><small class="k3l-subnote">Persentase ditampilkan mengikuti format realisasi: 1 pada sumber data = 100%.</small></div><div class="actions"><button class="btn" onclick="openInput('k3l')">＋ Input Data</button><button class="btn" onclick="mod('k3l')">↻ Refresh</button></div></div>
+    <div class="kpis k3l-kpis">${k('▤','blue','Total Record',rows.length,'Baris K3L sesuai filter')}${k('▦','cyan','Periode Terisi',filledRows,'Bulan dan tahun tersedia')}${k('✓','green','Kolom Realisasi',pctKeys.length,'Indikator aktivitas K3L')}${k('↗','green','Rata-rata Realisasi',avg.toLocaleString('id-ID',{minimumFractionDigits:0,maximumFractionDigits:1})+'%','Menghitung nilai terisi saja')}</div>
+    <div class="panel k3l-data-panel"><div class="head"><div><h3>Realisasi Program K3L</h3><p class="k3l-table-help">Nama indikator ditampilkan utuh. Gulir mendatar untuk melihat seluruh indikator dan gulir ke bawah untuk melihat setiap periode.</p></div><span>${rows.length} record</span></div>${table(m,rows)}</div>`;
+    return;
+   }
    content.innerHTML=`<div class="moduleHead"><div class="mi">${meta[0]}</div><div><h2>${meta[1]}</h2><p>${meta[2]}</p></div><div class="actions"><button class="btn" onclick="openInput('${m}')">＋ Input Data</button></div></div>
    <div class="kpis">${k(meta[0],'blue','Total Data',ss.total,'Sesuai filter')}${k('✓','green','Selesai',ss.selesai||0,'')}${k('◷','yellow','Proses',ss.proses||0,'')}${k('!','red','Belum',ss.belum||0,'')}${k('↗','cyan','Penyelesaian',(ss.rate||0).toFixed(1)+'%','Completion rate')}</div>
    <div class="panel"><div class="head"><h3>Data ${meta[1]}</h3><span>${rows.length} record</span></div>${table(m,rows)}</div>`;
@@ -841,7 +864,9 @@ function table(m,r){
  if(!r.length)return'<div class="empty">Tidak ada data untuk filter yang dipilih.</div>';
  const preferred={teknik:['ID','Tanggal','Penyulang','Lokasi','Jenis Pekerjaan','Status','Petugas'],transaksi:['ID','Tanggal','ID Pelanggan','Nomor Meter','Merk Meter','Kegiatan','Status','Petugas'],pelayanan:['ID','Tanggal','ID Pelanggan','Jenis Pelayanan','Nama Pelanggan','Status','Petugas'],k3l:['No','Bulan','Tahun'],pengusahaan:['ID','Tanggal','Indikator','Target','Realisasi','Satuan','Persentase']}[m]||[];
  const keys=Object.keys(r[0]||{}); const c=[...preferred.filter(k=>keys.includes(k)),...keys.filter(k=>!preferred.includes(k))];
- return'<div class="data-table-wrap"><table><thead><tr>'+c.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+r.slice(0,500).map(x=>'<tr>'+c.map(y=>'<td>'+((String(y).toLowerCase()==='status')?badge(x[y]):esc(formatSourceCell_(x[y],y)))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+ const k3l=m==='k3l';
+ const cell=(row,key)=>{const value=row[key];if(k3l){const idx=c.indexOf(key),name=String(key||'').trim();if(value===null||value===undefined||String(value).trim()==='')return '—';if(idx>=3&&!/keterangan|catatan|lokasi|petugas|nama|status|bulan|tahun|no\b|tanggal|tahun/i.test(name)){const n=numericValueForDisplay_(value);if(n!==null){const raw=String(value).trim();const pct=raw.includes('%')||n>1?n:n*100;return Math.max(0,Math.min(100,pct)).toLocaleString('id-ID',{maximumFractionDigits:1})+'%';}}}return formatSourceCell_(value,key)};
+ return'<div class="data-table-wrap '+(k3l?'k3l-table-wrap':'')+'"><table class="'+(k3l?'k3l-table':'')+'"><thead><tr>'+c.map(x=>'<th title="'+esc(x)+'">'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+r.slice(0,500).map(x=>'<tr>'+c.map(y=>'<td title="'+esc(x[y]??'')+'">'+((String(y).toLowerCase()==='status')?badge(x[y]):esc(cell(x,y)))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
 }
 function badge(s){const l=String(s||'').toLowerCase();let c=l.includes('selesai')?'bg':l.includes('proses')?'by':l.includes('belum')?'br':'bb';return`<span class="badge ${c}">${esc(s||'-')}</span>`}
 function fmt(n){return Number(n||0).toLocaleString('id-ID')}
