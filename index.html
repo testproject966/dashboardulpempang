@@ -345,6 +345,31 @@ tr:hover td{background:#f8fbff!important}
 .team-photo-stamp{flex:0 0 auto;width:88px;height:88px;border-radius:18px;display:grid;place-items:center;background:rgba(255,255,255,.17);border:1px solid rgba(255,255,255,.35);font-size:40px;backdrop-filter:blur(4px)}
 @media(max-width:720px){.team-photo-banner{min-height:125px;padding:17px;gap:10px}.team-photo-copy h3{font-size:18px}.team-photo-stamp{width:58px;height:58px;font-size:28px;border-radius:13px}.team-photo-copy p{font-size:10px}}
 
+
+/* ===== All-access navigation polish: collapsible sidebar, no user footer ===== */
+.user{display:none!important}
+.logoarea{position:relative;display:flex;align-items:center;gap:12px;padding:18px 14px 18px 16px!important;min-height:82px}
+.logo-copy{min-width:0;flex:1}
+.sidebar-toggle{flex:0 0 28px;width:28px;height:28px;border:1px solid #d7e3f0;border-radius:8px;background:#f7faff;color:#174ea6;font-size:21px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:background .18s ease,transform .18s ease}
+.sidebar-toggle:hover{background:#e8f0fe;transform:scale(1.04)}
+.side{transition:width .22s ease,transform .25s ease!important}
+.main{transition:margin-left .22s ease!important}
+body.sidebar-collapsed .side{width:76px!important}
+body.sidebar-collapsed .main{margin-left:76px!important}
+body.sidebar-collapsed .logoarea{justify-content:center;gap:0;padding:14px 8px!important}
+body.sidebar-collapsed .logoarea .logo{flex:0 0 42px}
+body.sidebar-collapsed .logo-copy{display:none!important}
+body.sidebar-collapsed .sidebar-toggle{position:absolute;right:5px;top:5px;width:22px;height:22px;font-size:17px;background:#fff;z-index:2}
+body.sidebar-collapsed .nav button{font-size:0!important;text-align:center!important;padding:12px 4px!important;justify-content:center}
+body.sidebar-collapsed .nav button i{font-size:15px!important;width:auto!important;margin:0!important}
+body.sidebar-collapsed .nav-sub{display:none!important}
+body.sidebar-collapsed .nav button:hover{transform:none!important}
+@media(max-width:650px){
+ .sidebar-toggle{display:none!important}
+ body.sidebar-collapsed .side{width:72px!important}
+ body.sidebar-collapsed .main{margin-left:72px!important}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -544,7 +569,7 @@ tbody tr:hover,.pro-table tbody tr:hover{background:#f8fafd}
 <body>
 <div class="app">
 <aside class="side" id="side">
- <div class="logoarea"><div class="logo">PLN</div><div><b>BRIGHT ULP<br>EMPANG</b><small>MONITORING KINERJA UNIT</small></div></div>
+ <div class="logoarea"><div class="logo">PLN</div><div class="logo-copy"><b>BRIGHT ULP<br>EMPANG</b><small>MONITORING KINERJA UNIT</small></div><button class="sidebar-toggle" id="sidebarToggle" type="button" onclick="toggleSidebarCollapse()" aria-label="Minimize sidebar" title="Minimize menu">‹</button></div>
  <nav class="nav" id="nav"></nav>
  <div class="user"><div class="avatar">👤</div><div><b id="uName">Pengguna</b><small id="uRole">VIEWER</small></div></div>
 </aside>
@@ -617,6 +642,11 @@ function boot(){
  const dz=document.getElementById('dropZone');
  if(dz){['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('dragging')}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('dragging')}));dz.addEventListener('drop',e=>{if(e.dataTransfer&&e.dataTransfer.files)handleFiles(e.dataTransfer.files)})}
  load();
+}
+function toggleSidebarCollapse(){
+ const collapsed=document.body.classList.toggle('sidebar-collapsed');
+ const btn=document.getElementById('sidebarToggle');
+ if(btn){btn.textContent=collapsed?'›':'‹';btn.setAttribute('aria-label',collapsed?'Maximize sidebar':'Minimize sidebar');btn.title=collapsed?'Maximize menu':'Minimize menu';}
 }
 function toggleSide(){document.getElementById('side').classList.toggle('open')}
 function module(m){
