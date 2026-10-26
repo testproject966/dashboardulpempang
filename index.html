@@ -437,6 +437,11 @@ tbody tr:hover td{background:#eef5ff!important}
 @media(max-width:980px){.bright-ops-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.bright-ops-heading{align-items:flex-start;flex-direction:column}.bright-ops-grid{grid-template-columns:1fr}.bright-ops-legend{flex-wrap:wrap}}
 
+
+/* ===== Live operational pulse: derive from each module's actual API rows ===== */
+.bright-ops-status.neutral{background:#e8f0fe;color:#174ea6}
+.bright-ops-track span.neutral{background:#8ab4f8}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -862,7 +867,8 @@ function businessHomeRender(x){
  const period=(x.latest&&x.latest.BULAN)||'Periode terbaru';
  const opsSummary=(D&&D.summary)||{};
  const opsDefs=[['teknik','Teknik Jaringan','🔧'],['transaksi','Transaksi Energi','⚡'],['pelayanan','Pelayanan Pelanggan','👥'],['k3l','K3L','🦺']];
- const opsCards='<div class="bright-ops-grid">'+opsDefs.map(d=>{const q=opsSummary[d[0]]||{};const rate=Math.max(0,Math.min(100,Number(q.rate)||0));const tone=rate>=80?'good':rate>=50?'warn':'risk';const status=rate>=80?'BAIK':rate>=50?'PERLU PANTAU':'PERLU TINDAK LANJUT';return '<article class="bright-ops-card"><div class="bright-ops-top"><span class="bright-ops-icon">'+d[2]+'</span><span class="bright-ops-status '+tone+'">'+status+'</span></div><h4>'+d[1]+'</h4><div class="bright-ops-metric"><strong>'+rate.toLocaleString('id-ID',{maximumFractionDigits:1})+'%</strong><span>penyelesaian</span></div><div class="bright-ops-track"><span class="'+tone+'" style="width:'+rate+'%"></span></div><div class="bright-ops-foot"><span>'+fmt(q.selesai||0)+' selesai</span><span>'+fmt(q.total||0)+' total</span></div></article>';}).join('')+'</div>';
+ const opsCards='<div class="bright-ops-grid">'+opsDefs.map(d=>{const q=opsSummary[d[0]]||{};const rate=Math.max(0,Math.min(100,Number(q.rate)||0));const tone=rate>=80?'good':rate>=50?'warn':'risk';const status=rate>=80?'BAIK':rate>=50?'PERLU PANTAU':'PERLU TINDAK LANJUT';return '<article class="bright-ops-card" data-ops="'+d[0]+'"><div class="bright-ops-top"><span class="bright-ops-icon">'+d[2]+'</span><span class="bright-ops-status '+tone+'">'+status+'</span></div><h4>'+d[1]+'</h4><div class="bright-ops-metric"><strong>'+rate.toLocaleString('id-ID',{maximumFractionDigits:1})+'%</strong><span>penyelesaian</span></div><div class="bright-ops-track"><span class="'+tone+'" style="width:'+rate+'%"></span></div><div class="bright-ops-foot"><span>'+fmt(q.selesai||0)+' selesai</span><span>'+fmt(q.total||0)+' total</span></div></article>';}).join('')+'</div>';
+ refreshOperationalPulse();
  content.innerHTML=
  '<div class="pro-welcome"><div><div class="pro-eyebrow">EXECUTIVE OVERVIEW / PLN UP3 SUMBAWA</div><h2>Ringkasan Pengusahaan</h2><p>Ikhtisar pelanggan, penjualan energi, pendapatan, dan kesiapan dataset unit dalam satu tampilan.</p></div><div class="pro-period"><small>PERIODE DATA</small><strong>'+esc(period)+'</strong><span><i class="pro-live-dot"></i> Sinkronisasi Spreadsheet</span></div></div>'+
  '<div class="pro-kpi-grid">'+
@@ -880,6 +886,36 @@ function businessHomeRender(x){
  '<section class="pro-panel pro-sales-preview"><div class="pro-panel-head"><div><span class="pro-panel-icon">▤</span><div><h3>Pratinjau Data Penjualan</h3><p>Cuplikan record dari sumber data penjualan</p></div></div><button class="pro-link-btn" onclick="module(\'penjualan\')">Buka tabel lengkap →</button></div>'+salesPreview+'</section>'+
  '<div class="pro-footer-note"><span>BRIGHT ULP EMPANG</span><span>Data operasional • PLN ULP Empang / PLN UP3 Sumbawa</span><span>Periode: '+esc(period)+'</span></div>';
 }
+
+async function refreshOperationalPulse(){
+ const defs=[['teknik','teknik'],['transaksi','transaksi'],['pelayanan','pelayanan'],['k3l','k3l']];
+ const isBlank=v=>v===null||v===undefined||String(v).trim()==='';
+ const parsePct=v=>{if(isBlank(v))return null;const n=numericValueForDisplay_(v);if(n===null)return null;return String(v).includes('%')||n>1?n:n*100;};
+ for(const [id,bidang] of defs){
+  try{
+   const rows=await apiGet({api:'getModule',bidang,year:year.value,month:month.value,status:status.value});
+   if(!Array.isArray(rows))continue;
+   const card=document.querySelector('[data-ops="'+id+'"]');if(!card)continue;
+   const total=rows.length;let done=0,rate=null,label='penyelesaian',doneLabel='selesai';
+   if(id==='k3l'){
+    const keys=Object.keys(rows[0]||{});
+    const pctKeys=keys.filter((key,i)=>i>=3&&!/^(no|bulan|tahun|tanggal|id|keterangan|catatan|lokasi|petugas|nama|status)$/i.test(String(key).trim())&&!/keterangan|catatan|lokasi|petugas|nama|status/i.test(String(key)));
+    const vals=[];rows.forEach(r=>pctKeys.forEach(k=>{const n=parsePct(r[k]);if(n!==null)vals.push(Math.max(0,Math.min(100,n)));}));
+    if(vals.length){rate=vals.reduce((a,b)=>a+b,0)/vals.length;done=vals.filter(v=>v>=100).length;label='rata-rata realisasi';doneLabel='indikator 100%';}
+   }else{
+    const keys=Object.keys(rows[0]||{}),sk=keys.find(k=>/status|progres|progress/i.test(String(k).trim()));
+    if(sk){const vals=rows.map(r=>String(r[sk]??'').trim().toLowerCase());done=vals.filter(v=>/selesai|done|complete|completed|closed|terpenuhi|tuntas|sudah/.test(v)).length;rate=total?done/total*100:0;}
+   }
+   if(rate===null){card.querySelector('.bright-ops-metric strong').textContent='—';card.querySelector('.bright-ops-metric span').textContent='realisasi belum terbaca';card.querySelector('.bright-ops-track span').style.width='0%';card.querySelector('.bright-ops-track span').className='neutral';card.querySelector('.bright-ops-status').className='bright-ops-status neutral';card.querySelector('.bright-ops-status').textContent=total?'CEK KOLOM REALISASI':'BELUM ADA DATA';card.querySelector('.bright-ops-foot').innerHTML='<span>'+fmt(total)+' record</span><span>data API</span>';continue;}
+   rate=Math.max(0,Math.min(100,rate));const tone=rate>=80?'good':rate>=50?'warn':'risk';
+   card.querySelector('.bright-ops-metric strong').textContent=rate.toLocaleString('id-ID',{maximumFractionDigits:1})+'%';card.querySelector('.bright-ops-metric span').textContent=label;
+   const bar=card.querySelector('.bright-ops-track span');bar.style.width=rate+'%';bar.className=tone;
+   const badge=card.querySelector('.bright-ops-status');badge.className='bright-ops-status '+tone;badge.textContent=rate>=80?'BAIK':rate>=50?'PERLU PANTAU':'PERLU TINDAK LANJUT';
+   card.querySelector('.bright-ops-foot').innerHTML='<span>'+fmt(done)+' '+doneLabel+'</span><span>'+fmt(total)+' record</span>';
+  }catch(e){const card=document.querySelector('[data-ops="'+id+'"]');if(card){card.querySelector('.bright-ops-metric strong').textContent='—';card.querySelector('.bright-ops-metric span').textContent='API tidak tersedia';}}
+ }
+}
+
 function resetFilters(){document.getElementById('month').value='';document.getElementById('year').value='';document.getElementById('status').value='Semua';load()}
 function exportCurrentData(){
  const m=CUR==='pengusahaan'?'penjualan':CUR;
