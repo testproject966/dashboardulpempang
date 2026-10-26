@@ -1045,9 +1045,10 @@ async function refreshOperationalPulse(){
  };
  const statusValue=v=>{
   const x=keyNorm(v);
-  if(/^(selesai|done|complete|completed|closed|terpenuhi|tuntas|sudah|terlaksana|tercapai|100)$/.test(x))return 'done';
-  if(/proses|progress|progress|berjalan|dikerjakan|on going|ongoing|in progress/.test(x))return 'process';
-  if(/belum|pending|tertunda|menunggu|open|not started|belum selesai/.test(x))return 'pending';
+  // Negative/pending states first so 'Belum Selesai' is never counted as done.
+  if(/belum|pending|tertunda|menunggu|open|not started|tidak selesai|belum terpenuhi/.test(x))return 'pending';
+  if(/proses|progress|berjalan|dikerjakan|on going|ongoing|in progress|sedang ditangani/.test(x))return 'process';
+  if(/selesai|done|complete|completed|closed|terpenuhi|tuntas|sudah|terlaksana|tercapai|100 persen|100%/.test(x))return 'done';
   return '';
  };
  const setNeutral=(card,title,detail,totalText)=>{
