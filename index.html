@@ -1036,54 +1036,96 @@ function businessHomeRender(x){
 async function refreshOperationalPulse(){
  const defs=[['teknik','teknik'],['transaksi','transaksi'],['pelayanan','pelayanan'],['k3l','k3l']];
  const isBlank=v=>v===null||v===undefined||String(v).trim()==='';
- const parsePct=v=>{if(isBlank(v))return null;const n=numericValueForDisplay_(v);if(n===null)return null;return String(v).includes('%')||n>1?n:n*100;};
- for(const [id,bidang] of defs){
-  try{
-   const rows=await apiGet({api:'getModule',bidang,year:year.value,month:month.value,status:status.value});
-   const card=document.querySelector('[data-ops="'+id+'"]');
-   if(!card)continue;
-   if(!Array.isArray(rows)||!rows.length){
-    card.querySelector('.bright-ops-metric strong').textContent='—';
-    card.querySelector('.bright-ops-metric span').textContent='belum ada data pada filter';
-    card.querySelector('.bright-ops-track span').style.width='0%';
-    card.querySelector('.bright-ops-track span').className='neutral';
-    card.querySelector('.bright-ops-status').className='bright-ops-status neutral';
-    card.querySelector('.bright-ops-status').textContent='BELUM ADA DATA';
-    card.querySelector('.bright-ops-foot').innerHTML='<span>0 record</span><span>data API</span>';
-    continue;
+ const keyNorm=k=>String(k??'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ const asPct=v=>{
+  if(isBlank(v))return null;
+  const raw=String(v).trim(),n=numericValueForDisplay_(v);
+  if(n===null||!Number.isFinite(n))return null;
+  return /%/.test(raw)||Math.abs(n)>1?n:n*100;
+ };
+ const statusValue=v=>{
+  const x=keyNorm(v);
+  if(/^(selesai|done|complete|completed|closed|terpenuhi|tuntas|sudah|terlaksana|tercapai|100)$/.test(x))return 'done';
+  if(/proses|progress|progress|berjalan|dikerjakan|on going|ongoing|in progress/.test(x))return 'process';
+  if(/belum|pending|tertunda|menunggu|open|not started|belum selesai/.test(x))return 'pending';
+  return '';
+ };
+ const setNeutral=(card,title,detail,totalText)=>{
+  card.querySelector('.bright-ops-metric strong').textContent='—';
+  card.querySelector('.bright-ops-metric span').textContent=detail;
+  const bar=card.querySelector('.bright-ops-track span');bar.style.width='0%';bar.className='neutral';
+  const badge=card.querySelector('.bright-ops-status');badge.className='bright-ops-status neutral';badge.textContent=title;
+  card.querySelector('.bright-ops-foot').innerHTML='<span>'+totalText+'</span><span>data API</span>';
+ };
+ const results=await Promise.all(defs.map(async ([id,bidang])=>{
+  try{return {id,rows:await apiGet({api:'getModule',bidang,year:year.value,month:month.value,status:status.value})};}
+  catch(e){return {id,error:e};}
+ }));
+ for(const item of results){
+  const {id,rows,error}=item,card=document.querySelector('[data-ops="'+id+'"]');
+  if(!card)continue;
+  if(error){setNeutral(card,'API TIDAK TERSEDIA','gagal membaca data','—');continue;}
+  if(!Array.isArray(rows)||!rows.length){setNeutral(card,'BELUM ADA DATA','belum ada data pada filter','0 record');continue;}
+  const total=rows.length,keys=Object.keys(rows[0]||{});
+  // Prefer explicitly named completion/realisasi columns; avoid treating IDs,
+  // dates, amounts, or counts as percentages.
+  const pctKeys=keys.filter(k=>{
+   const n=keyNorm(k);
+   return /(^| )(realisasi|persentase|percentage|completion rate|tingkat penyelesaian|progres|progress)( |$)/.test(n)
+    && !/(pendapatan|rupiah|biaya|target kwh|penjualan|energi|jumlah|total|nominal|tanggal|tahun|bulan)/.test(n);
+  });
+  const pctValues=[];
+  for(const row of rows){
+   for(const key of pctKeys){
+    const p=asPct(row[key]);
+    if(p!==null)pctValues.push(Math.max(0,Math.min(100,p)));
    }
-   const total=rows.length;let done=0,rate=null,label='penyelesaian',doneLabel='selesai';
-   if(id==='k3l'){
-    // Match the calculation used by the K3L detail page exactly.
-    const keys=Object.keys(rows[0]||{});
-    const pctKeys=keys.filter((key,i)=>i>=3&&!/^(no|bulan|tahun|tanggal|id|keterangan|catatan|lokasi|petugas|nama|status)$/i.test(String(key).trim())&&!/keterangan|catatan|lokasi|petugas|nama|status/i.test(String(key)));
-    const pctVals=[];
-    rows.forEach(r=>pctKeys.forEach(key=>{const raw=r[key];if(isBlank(raw))return;const n=numericValueForDisplay_(raw);if(n===null)return;const v=(String(raw).includes('%')||n>1)?n:n*100;pctVals.push(Math.max(0,Math.min(100,v)));}));
-    if(pctVals.length){rate=pctVals.reduce((a,b)=>a+b,0)/pctVals.length;done=pctVals.filter(v=>v>=100).length;label='rata-rata realisasi';doneLabel='indikator 100%';}
-   }else{
-    const keys=Object.keys(rows[0]||{}),sk=keys.find(k=>/status|progres|progress/i.test(String(k).trim()));
-    if(sk){const vals=rows.map(r=>String(r[sk]??'').trim().toLowerCase());done=vals.filter(v=>/selesai|done|complete|completed|closed|terpenuhi|tuntas|sudah/.test(v)).length;rate=done/total*100;}
-   }
-   if(rate===null){
-    card.querySelector('.bright-ops-metric strong').textContent='—';
-    card.querySelector('.bright-ops-metric span').textContent='kolom realisasi/status belum dikenali';
-    card.querySelector('.bright-ops-track span').style.width='0%';
-    card.querySelector('.bright-ops-track span').className='neutral';
-    card.querySelector('.bright-ops-status').className='bright-ops-status neutral';
-    card.querySelector('.bright-ops-status').textContent='PERIKSA KOLOM';
-    card.querySelector('.bright-ops-foot').innerHTML='<span>'+fmt(total)+' record</span><span>nilai belum dihitung</span>';
-    continue;
-   }
-   rate=Math.max(0,Math.min(100,rate));const tone=rate>=80?'good':rate>=50?'warn':'risk';
-   card.querySelector('.bright-ops-metric strong').textContent=rate.toLocaleString('id-ID',{maximumFractionDigits:1})+'%';
-   card.querySelector('.bright-ops-metric span').textContent=label;
-   const bar=card.querySelector('.bright-ops-track span');bar.style.width=rate+'%';bar.className=tone;
-   const badge=card.querySelector('.bright-ops-status');badge.className='bright-ops-status '+tone;badge.textContent=rate>=80?'BAIK':rate>=50?'PERLU PANTAU':'PERLU TINDAK LANJUT';
-   card.querySelector('.bright-ops-foot').innerHTML='<span>'+fmt(done)+' '+doneLabel+'</span><span>'+fmt(total)+' record</span>';
-  }catch(e){
-   const card=document.querySelector('[data-ops="'+id+'"]');
-   if(card){card.querySelector('.bright-ops-metric strong').textContent='—';card.querySelector('.bright-ops-metric span').textContent='API tidak tersedia';}
   }
+  let done=0,rate=null,label='penyelesaian',doneLabel='selesai',metricKind='status';
+  if(pctValues.length){
+   rate=pctValues.reduce((a,b)=>a+b,0)/pctValues.length;
+   done=pctValues.filter(v=>v>=99.999).length;
+   label='rata-rata realisasi';doneLabel='indikator ≥100%';metricKind='realisasi';
+  }else{
+   const statusKeys=keys.filter(k=>/(^| )(status|status pekerjaan|status realisasi|progress status|progres status)( |$)/.test(keyNorm(k)));
+   const statusKey=statusKeys[0]||keys.find(k=>/status|progres|progress/i.test(String(k).trim()));
+   if(statusKey){
+    const states=rows.map(r=>statusValue(r[statusKey]));
+    done=states.filter(v=>v==='done').length;
+    const recognized=states.filter(Boolean).length;
+    const process=states.filter(v=>v==='process').length;
+    const pending=states.filter(v=>v==='pending').length;
+    if(recognized){
+     rate=done/recognized*100;
+     label='pekerjaan selesai';
+     doneLabel='selesai';
+    }
+   }
+  }
+  // K3L source sheets often store activity realization as multiple percentage
+  // columns rather than a single "Status" field. Use those numeric indicators
+  // only when the explicit field names were not sufficient.
+  if(rate===null&&id==='k3l'){
+   const skip=/^(no|bulan|tahun|tanggal|id|keterangan|catatan|lokasi|petugas|nama|status|periode|indikator|kegiatan)$/;
+   const candidates=keys.filter((k,i)=>i>=3&&!skip.test(keyNorm(k))&&!/(keterangan|catatan|lokasi|petugas|nama|status|tanggal|tahun|bulan|periode|indikator|kegiatan|id)/.test(keyNorm(k)));
+   const values=[];
+   rows.forEach(row=>candidates.forEach(key=>{
+    const p=asPct(row[key]);if(p!==null)values.push(Math.max(0,Math.min(100,p)));
+   }));
+   if(values.length){rate=values.reduce((a,b)=>a+b,0)/values.length;done=values.filter(v=>v>=99.999).length;label='rata-rata realisasi';doneLabel='indikator ≥100%';metricKind='realisasi';}
+  }
+  if(rate===null||!Number.isFinite(rate)){
+   setNeutral(card,'PERIKSA KOLOM','kolom realisasi/status belum dikenali',total+' record');
+   card.querySelector('.bright-ops-foot').innerHTML='<span>'+fmt(total)+' record</span><span>nilai belum dihitung</span>';
+   continue;
+  }
+  rate=Math.max(0,Math.min(100,rate));
+  const tone=rate>=80?'good':rate>=50?'warn':'risk';
+  card.querySelector('.bright-ops-metric strong').textContent=rate.toLocaleString('id-ID',{maximumFractionDigits:1})+'%';
+  card.querySelector('.bright-ops-metric span').textContent=label;
+  const bar=card.querySelector('.bright-ops-track span');bar.style.width=rate+'%';bar.className=tone;
+  const badge=card.querySelector('.bright-ops-status');badge.className='bright-ops-status '+tone;badge.textContent=rate>=80?'BAIK':rate>=50?'PERLU PANTAU':'PERLU TINDAK LANJUT';
+  card.querySelector('.bright-ops-foot').innerHTML='<span>'+fmt(done)+' '+doneLabel+'</span><span>'+fmt(total)+' record</span>';
  }
 }
 function resetFilters(){document.getElementById('month').value='';document.getElementById('year').value='';document.getElementById('status').value='Semua';load()}
