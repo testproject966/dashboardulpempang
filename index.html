@@ -332,6 +332,19 @@ tr:hover td{background:#f8fbff!important}
 .pro-welcome .pro-period span{color:#202124!important}
 .pro-welcome .pro-period .pro-live-dot{background:#34a853!important}
 
+
+/* ===== Team-photo banners for individual work areas ===== */
+.team-photo-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:22px;min-height:152px;padding:22px 25px;margin:0 0 16px;border-radius:14px;overflow:hidden;background:#174a7e;color:#fff;isolation:isolate}
+.team-photo-banner:before{content:"";position:absolute;inset:0;z-index:-2;background-image:var(--team-photo);background-position:center 42%;background-size:cover;filter:saturate(.88)}
+.team-photo-banner:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(7,42,77,.94) 0%,rgba(7,65,112,.82) 48%,rgba(6,119,143,.25) 100%)}
+.team-photo-copy{max-width:600px}
+.team-photo-kicker{display:inline-flex;align-items:center;gap:7px;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#ffe082;margin-bottom:8px}
+.team-photo-copy h3{font-size:22px;line-height:1.2;margin:0 0 7px;color:#fff}
+.team-photo-copy p{font-size:11px;line-height:1.6;margin:0;color:rgba(255,255,255,.9)}
+.team-photo-note{display:inline-block;margin-top:10px;padding:5px 8px;border:1px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:9px;background:rgba(0,0,0,.15)}
+.team-photo-stamp{flex:0 0 auto;width:88px;height:88px;border-radius:18px;display:grid;place-items:center;background:rgba(255,255,255,.17);border:1px solid rgba(255,255,255,.35);font-size:40px;backdrop-filter:blur(4px)}
+@media(max-width:720px){.team-photo-banner{min-height:125px;padding:17px;gap:10px}.team-photo-copy h3{font-size:18px}.team-photo-stamp{width:58px;height:58px;font-size:28px;border-radius:13px}.team-photo-copy p{font-size:10px}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -889,7 +902,14 @@ function mod(m){
     <div class="panel k3l-data-panel"><div class="head"><div><h3>Realisasi Program K3L</h3><p class="k3l-table-help">Nama indikator ditampilkan utuh. Gulir mendatar untuk melihat seluruh indikator dan gulir ke bawah untuk melihat setiap periode.</p></div><span>${rows.length} record</span></div>${table(m,rows)}</div>`;
     return;
    }
+   const teamPhoto={
+    teknik:'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1400&q=80',
+    transaksi:'https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=1400&q=80',
+    pelayanan:'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1400&q=80',
+    k3l:'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1400&q=80'
+   }[m]||'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1400&q=80';
    content.innerHTML=`<div class="moduleHead"><div class="mi">${meta[0]}</div><div><h2>${meta[1]}</h2><p>${meta[2]}</p></div><div class="actions"><button class="btn" onclick="openInput('${m}')">＋ Input Data</button></div></div>
+   <section class="team-photo-banner" style="--team-photo:url('${teamPhoto}')"><div class="team-photo-copy"><span class="team-photo-kicker">PLN ULP EMPANG • UP3 SUMBAWA</span><h3>${meta[1]}</h3><p>${meta[2]} dalam satu tampilan monitoring terpadu.</p><span class="team-photo-note">Foto ilustrasi sementara · dapat diganti dengan foto tim asli</span></div><div class="team-photo-stamp">${meta[0]}</div></section>
    <div class="kpis">${k(meta[0],'blue','Total Data',ss.total,'Sesuai filter')}${k('✓','green','Selesai',ss.selesai||0,'')}${k('◷','yellow','Proses',ss.proses||0,'')}${k('!','red','Belum',ss.belum||0,'')}${k('↗','cyan','Penyelesaian',(ss.rate||0).toFixed(1)+'%','Completion rate')}</div>
    <div class="panel"><div class="head"><h3>Data ${meta[1]}</h3><span>${rows.length} record</span></div>${table(m,rows)}</div>`;
   }).catch(e=>toast('Gagal: '+e.message));
