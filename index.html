@@ -1036,7 +1036,7 @@ function businessHomeRender(x){
 async function refreshOperationalPulse(){
  const defs=[['teknik','teknik'],['transaksi','transaksi'],['pelayanan','pelayanan'],['k3l','k3l']];
  const isBlank=v=>v===null||v===undefined||String(v).trim()==='';
- const keyNorm=k=>String(k??'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ const keyNorm=k=>String(k??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
  const asPct=v=>{
   if(isBlank(v))return null;
   const raw=String(v).trim(),n=numericValueForDisplay_(v);
