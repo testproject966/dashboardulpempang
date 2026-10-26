@@ -899,7 +899,7 @@ async function refreshOperationalPulse(){
    const total=rows.length;let done=0,rate=null,label='penyelesaian',doneLabel='selesai';
    if(id==='k3l'){
     const keys=Object.keys(rows[0]||{});
-    const pctKeys=keys.filter((key,i)=>i>=3&&!/^(no|bulan|tahun|tanggal|id|keterangan|catatan|lokasi|petugas|nama|status)$/i.test(String(key).trim())&&!/keterangan|catatan|lokasi|petugas|nama|status/i.test(String(key)));
+    const pctKeys=keys.filter(key=>!/^(no|nomor|bulan|tahun|tanggal|id|timestamp|waktu|periode|keterangan|catatan|lokasi|petugas|nama|status|unit|indikator|program|uraian|aktivitas|target|satuan)$/i.test(String(key).trim())&&!/(keterangan|catatan|lokasi|petugas|nama|status|timestamp|waktu|periode|bulan|tahun|tanggal|unit|indikator|program|uraian|aktivitas|satuan)/i.test(String(key)));
     const vals=[];rows.forEach(r=>pctKeys.forEach(k=>{const n=parsePct(r[k]);if(n!==null)vals.push(Math.max(0,Math.min(100,n)));}));
     if(vals.length){rate=vals.reduce((a,b)=>a+b,0)/vals.length;done=vals.filter(v=>v>=100).length;label='rata-rata realisasi';doneLabel='indikator 100%';}
    }else{
