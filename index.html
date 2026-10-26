@@ -257,6 +257,63 @@ button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible
 .side{box-shadow:2px 0 12px rgba(7,25,43,.1)}
 .nav button,.nav .nav-item{border-radius:9px}
 @media(max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.k3l-table-wrap{max-height:65vh}.k3l-table th,.k3l-table td{min-width:170px;max-width:220px}.k3l-table th:nth-child(-n+3),.k3l-table td:nth-child(-n+3){min-width:55px;max-width:70px}.pro-welcome{padding:18px}.data-table-wrap td{max-width:220px}}
+
+/* ===== Looker Studio visual refinement for existing BRIGHT ULP EMPANG ===== */
+:root{
+ --nav:#ffffff;--nav2:#f7faff;--primary:#0b57d0;--primary2:#0b57d0;
+ --bg:#f1f3f4;--card:#ffffff;--ink:#202124;--muted:#68778b;--line:#dfe5ec;
+ --green:#188038;--yellow:#f9ab00;--red:#d93025;--cyan:#12a4b4;
+ --shadow:0 1px 4px rgba(60,64,67,.12);--r:12px;
+}
+body{background:#f1f3f4;color:#202124;font-family:Arial,Roboto,"Segoe UI",sans-serif}
+.side{background:#fff!important;color:#202124!important;border-right:1px solid #dadce0!important;box-shadow:none!important}
+.logoarea{border-bottom:1px solid #e8eaed!important}
+.logoarea b{color:#202124!important;font-size:13px!important}
+.logoarea small{color:#5f6368!important}
+.nav button{color:#3c4043!important;border-radius:6px!important;font-size:12px!important}
+.nav button:hover{background:#f1f3f4!important;color:#174ea6!important}
+.nav button.active{background:#e8f0fe!important;color:#174ea6!important;box-shadow:inset 3px 0 0 #1a73e8!important}
+.user{border-top:1px solid #e8eaed!important;color:#3c4043!important}
+.avatar{background:#e8f0fe!important;color:#174ea6!important}
+.user small{color:#5f6368!important}
+.top{background:#fff!important;border-bottom:1px solid #dadce0!important;box-shadow:none!important;height:66px!important}
+.top h1{color:#174ea6!important;font-size:17px!important}
+.top p{color:#5f6368!important}
+.main{background:#f1f3f4!important}
+.content{padding:22px 26px 40px!important;max-width:1600px!important}
+.hero{background:linear-gradient(110deg,#174a7e 0%,#1769aa 58%,#079eac 100%)!important;color:#fff!important;border-radius:14px!important;box-shadow:none!important;padding:24px 26px!important}
+.hero .eyebrow,.hero h2,.hero p,.hero .updated{color:#fff!important}
+.hero .eyebrow{opacity:.9!important}
+.hero h2{font-size:25px!important;font-weight:700!important;letter-spacing:-.3px!important}
+.hero p{opacity:.88!important}
+.filters,.panel,.kpi,.pe-kpi{background:#fff!important;border:1px solid #dfe5ec!important;border-radius:12px!important;box-shadow:0 1px 4px rgba(60,64,67,.10)!important}
+.field label{color:#5f6368!important;font-size:9px!important;letter-spacing:.35px!important}
+.field select,.field input{border-color:#dadce0!important;border-radius:7px!important;background:#fff!important;color:#202124!important}
+.refresh,.btn{background:#1a73e8!important;border-radius:7px!important}
+.refresh:hover,.btn:hover{background:#174ea6!important}
+.kpi{min-height:110px!important;position:relative!important;overflow:hidden!important}
+.kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#1a73e8}
+.kpi .val{font-size:25px!important;color:#202124!important;letter-spacing:-.4px!important}
+.kpi .lbl,.head h3{color:#3c4043!important}
+.kpi .sub,.head span{color:#68778b!important}
+.grid{gap:15px!important}
+.head{padding-bottom:10px!important;border-bottom:1px solid #edf0f4!important}
+table{font-size:10px!important}
+th{background:#f8fafd!important;color:#5f6368!important}
+td{border-bottom-color:#edf0f4!important}
+tr:hover td{background:#f8fbff!important}
+.pe-title{background:linear-gradient(110deg,#174a7e,#0b8fa5)!important;box-shadow:none!important;border-radius:14px!important}
+.pe-title .moduleHead h2,.pe-title .moduleHead p{color:#fff!important}
+.pe-kpi strong{color:#202124!important}
+.pe-bar{background:linear-gradient(180deg,#5e9ff3,#1a73e8)!important}
+.badge{letter-spacing:.1px}
+@media(max-width:720px){
+ .content{padding:14px 12px 30px!important}
+ .hero{padding:18px!important}
+ .hero h2{font-size:21px!important}
+ .kpi{border-radius:10px!important}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
