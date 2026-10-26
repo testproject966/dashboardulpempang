@@ -222,15 +222,18 @@ function filter_(rows,f){
   });
 }
 
+function classifyStatus_(value){
+  const x=String(value||'').toLowerCase().trim();
+  // Negative states must be tested before positive words such as 'selesai'.
+  if(/belum|pending|tertunda|menunggu|open|not started|tidak selesai|belum terpenuhi/.test(x))return 'belum';
+  if(/proses|progress|berjalan|dikerjakan|on going|ongoing|in progress|sedang ditangani/.test(x))return 'proses';
+  if(/selesai|done|complete|completed|closed|terpenuhi|tuntas|sudah|terlaksana|tercapai/.test(x))return 'selesai';
+  return 'lainnya';
+}
+
 function summary_(rows){
   let s={total:rows.length,selesai:0,proses:0,belum:0,lainnya:0};
-  rows.forEach(r=>{
-    const x=String(r.Status||'').toLowerCase();
-    if(x.includes('selesai'))s.selesai++;
-    else if(x.includes('proses'))s.proses++;
-    else if(x.includes('belum'))s.belum++;
-    else s.lainnya++;
-  });
+  rows.forEach(r=>{s[classifyStatus_(r.Status)]++;});
   s.rate=s.total?s.selesai/s.total*100:0;
   return s;
 }
@@ -257,10 +260,10 @@ function trend_(f){
         const d=String(r.Tanggal||'');
         if(Number(d.slice(0,4))===year && Number(d.slice(5,7))===i+1){
           total++;
-          const s=String(r.Status||'').toLowerCase();
-          if(s.includes('selesai'))done++;
-          else if(s.includes('proses'))process++;
-          else if(s.includes('belum'))pending++;
+          const state=classifyStatus_(r.Status);
+          if(state==='selesai')done++;
+          else if(state==='proses')process++;
+          else if(state==='belum')pending++;
         }
       });
     });
