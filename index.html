@@ -370,6 +370,50 @@ body.sidebar-collapsed .nav button:hover{transform:none!important}
  body.sidebar-collapsed .main{margin-left:72px!important}
 }
 
+
+/* ===== BRIGHT dashboard visual polish v2: consistent cards, charts and data explorer ===== */
+:root{--bg:#f1f3f4;--card:#fff;--ink:#202124;--muted:#5f6368;--line:#dfe3eb;--primary:#1a73e8}
+.content{max-width:1680px}
+.kpi,.panel,.data-panel,.summary-card,.pro-data-panel,.pro-error-card,.support-card{border:1px solid #e0e5ec!important;border-radius:12px!important;box-shadow:0 1px 3px rgba(60,64,67,.10),0 3px 8px rgba(60,64,67,.04)!important}
+.kpi{transition:transform .18s ease,box-shadow .18s ease}
+.kpi:hover,.support-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(60,64,67,.12)!important}
+.panel .head h3,.data-panel h3,.pro-panel-head h3{font-weight:700;color:#202124}
+.panel .head p,.pro-panel-head p{color:#68778b}
+.pro-welcome{color:#fff!important;background:linear-gradient(110deg,#174a7e 0%,#1769aa 58%,#079eac 100%)!important;border:0!important;border-radius:14px!important}
+.pro-welcome .pro-eyebrow,.pro-welcome h2,.pro-welcome p{color:#fff!important}
+.pro-welcome .pro-eyebrow{opacity:.9}
+.pro-welcome p{opacity:.9}
+.pro-period{background:#fff!important;border:1px solid #e0e6ed!important;border-radius:10px!important;color:#202124!important}
+.pro-period small,.pro-period strong,.pro-period span{color:#202124!important}
+.pro-period .pro-live-dot{background:#34a853!important}
+.module-summary{gap:14px}
+.summary-card{padding:17px!important;background:#fff!important}
+.summary-card small{color:#68778b!important}
+.summary-card strong{color:#202124!important;font-size:23px!important}
+.pro-table-toolbar{gap:12px}
+.pro-table-search input{outline:none}
+.pro-outline-btn{transition:background .16s ease,border-color .16s ease}
+.pro-outline-btn:hover{background:#e8f0fe!important;border-color:#8ab4f8!important}
+.pro-quality-row{background:#f8fbff!important;border:1px solid #e0e8f3!important}
+.pro-data-panel{overflow:hidden}
+.pro-table-footer{color:#68778b}
+table{border-collapse:separate;border-spacing:0}
+thead th{position:sticky;top:0;z-index:1}
+tbody tr:nth-child(even) td{background:#fbfcfe}
+tbody tr:hover td{background:#eef5ff!important}
+.hero-actions button,.btn,.hero-btn{transition:transform .15s ease,box-shadow .15s ease}
+.hero-actions button:hover,.btn:hover,.hero-btn:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.10)}
+/* Team photo header for Pengusahaan data explorer pages */
+.business-team-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:118px;padding:20px 24px;margin:14px 0 16px;overflow:hidden;border-radius:13px;color:#fff;background:#174a7e;isolation:isolate}
+.business-team-banner:before{content:"";position:absolute;inset:0;z-index:-2;background-image:var(--business-team-photo);background-position:center 42%;background-size:cover}
+.business-team-banner:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(7,42,77,.95),rgba(7,65,112,.78) 58%,rgba(6,119,143,.25))}
+.business-team-banner h3{margin:0 0 6px;color:#fff;font-size:19px}
+.business-team-banner p{margin:0;color:rgba(255,255,255,.9);font-size:11px;line-height:1.6}
+.business-team-banner .kicker{font-size:9px;font-weight:800;letter-spacing:1px;color:#ffe082;text-transform:uppercase;margin-bottom:7px}
+.business-team-banner .note{display:inline-block;margin-top:9px;padding:4px 8px;border:1px solid rgba(255,255,255,.35);border-radius:20px;font-size:9px;color:#fff}
+.business-team-banner .symbol{width:64px;height:64px;flex:0 0 64px;display:grid;place-items:center;border-radius:14px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);font-size:30px}
+@media(max-width:720px){.business-team-banner{padding:16px;min-height:105px}.business-team-banner h3{font-size:17px}.business-team-banner .symbol{width:48px;height:48px;flex-basis:48px;font-size:24px}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -841,7 +885,9 @@ function loadPengusahaanSub(m){
   const summary='<div class="module-summary pro-summary"><div class="summary-card"><small>Jumlah Record</small><strong>'+fmt(rows.length)+'</strong><span>Baris data terbaca</span></div><div class="summary-card"><small>Periode Terbaru</small><strong class="summary-period">'+esc(period)+'</strong><span>Referensi dari API</span></div><div class="summary-card"><small>Kolom Data</small><strong>'+fmt(columns)+'</strong><span>Field pada tabel</span></div><div class="summary-card"><small>Kelengkapan Field</small><strong>'+completeness+'%</strong><span>Sel terisi pada tampilan data</span></div></div>';
   const dataToolbar='<div class="pro-table-toolbar"><div class="pro-table-search"><span>⌕</span><input id="businessTableSearch" type="search" placeholder="Cari nama, periode, wilayah, atau isi data…" oninput="renderBusinessSubTable()"></div><div class="pro-table-actions"><span id="businessTableCount">'+fmt(rows.length)+' record</span><button class="pro-outline-btn" onclick="exportCurrentData()">↓ Export CSV</button><button class="pro-outline-btn" onclick="loadPengusahaanSub(\''+m+'\')">↻ Refresh</button></div></div>';
   const quality='<div class="pro-quality-row"><div><span class="pro-quality-mark '+(rows.length?'good':'warn')+'">'+(rows.length?'✓':'!')+'</span><span><b>'+(rows.length?'Dataset berhasil dibaca':'Belum ada record')+'</b><small>'+(rows.length?'Struktur tabel terdeteksi dari '+columns+' kolom.':'Pastikan sheet '+titles[m]+' berisi data dan endpoint API telah aktif.')+'</small></span></div><span class="pro-quality-period">Periode: '+esc(period)+'</span></div>';
-  content.innerHTML='<div class="pro-welcome"><div><div class="pro-eyebrow">DATA EXPLORER / PENGUSAHAAN</div><h2>'+titles[m]+'</h2><p>'+descriptions[m]+'</p></div><div class="pro-period"><small>STATUS DATASET</small><strong>'+(rows.length?'DATA TERSEDIA':'DATA KOSONG')+'</strong><span><i class="pro-live-dot"></i> Respons API diterima</span></div></div>'+summary+quality+'<div class="data-panel pro-data-panel"><div class="pro-panel-head"><div><span class="pro-panel-icon">▤</span><div><h3>Tabel Rincian '+titles[m]+'</h3><p>Gunakan pencarian untuk menemukan record tertentu. Tabel mengikuti kolom dari sumber data.</p></div></div></div>'+dataToolbar+'<div id="businessSubTableBody"></div><div class="pro-table-footer"><span>BRIGHT ULP EMPANG • Pengusahaan</span><span>Data ditampilkan sesuai respons API</span></div></div>';
+  const subVisual={penjualan:['https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=1400&q=80','⚡'],pelanggan:['https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1400&q=80','👥'],aset:['https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1400&q=80','🏗️'],sdm:['https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1400&q=80','👷'],tad:['https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1400&q=80','🦺']}[m]||['https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1400&q=80','📊'];
+  const teamBanner='<section class="business-team-banner" style="--business-team-photo:url(\''+subVisual[0]+'\')"><div><div class="kicker">PLN ULP EMPANG • UP3 SUMBAWA</div><h3>'+titles[m]+'</h3><p>'+descriptions[m]+' dalam monitoring pengusahaan terpadu.</p><span class="note">Foto ilustrasi sementara · dapat diganti foto tim asli</span></div><div class="symbol">'+subVisual[1]+'</div></section>';
+  content.innerHTML='<div class="pro-welcome"><div><div class="pro-eyebrow">DATA EXPLORER / PENGUSAHAAN</div><h2>'+titles[m]+'</h2><p>'+descriptions[m]+'</p></div><div class="pro-period"><small>STATUS DATASET</small><strong>'+(rows.length?'DATA TERSEDIA':'DATA KOSONG')+'</strong><span><i class="pro-live-dot"></i> Respons API diterima</span></div></div>'+teamBanner+summary+quality+'<div class="data-panel pro-data-panel"><div class="pro-panel-head"><div><span class="pro-panel-icon">▤</span><div><h3>Tabel Rincian '+titles[m]+'</h3><p>Gunakan pencarian untuk menemukan record tertentu. Tabel mengikuti kolom dari sumber data.</p></div></div></div>'+dataToolbar+'<div id="businessSubTableBody"></div><div class="pro-table-footer"><span>BRIGHT ULP EMPANG • Pengusahaan</span><span>Data ditampilkan sesuai respons API</span></div></div>';
   renderBusinessSubTable();
  }).catch(e=>{content.innerHTML='<div class="pro-welcome"><div><div class="pro-eyebrow">DATA EXPLORER / PENGUSAHAAN</div><h2>'+titles[m]+'</h2><p>'+descriptions[m]+'</p></div><div class="pro-period"><small>STATUS DATASET</small><strong>API BELUM TERHUBUNG</strong><span>Perlu pemeriksaan backend</span></div></div><div class="pro-error-card"><span class="pro-error-icon">!</span><div><h3>Data belum dapat dimuat</h3><p>'+esc(e.message)+'</p><small>Periksa deployment Google Apps Script, akses Web App, dan fungsi getPengusahaanDashboard. Tampilan dan database tidak diubah oleh pesan ini.</small><div class="pro-error-actions"><button class="pro-outline-btn" onclick="loadPengusahaanSub(\''+m+'\')">Coba Lagi</button><a href="https://script.google.com/home" target="_blank" rel="noopener">Buka Apps Script →</a></div></div></div>'});
 }
