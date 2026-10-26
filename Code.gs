@@ -340,6 +340,14 @@ const PENGUSAHAAN_DATA_SHEETS = {
   tad:'TAD'
 };
 
+function normalizeHeaderPeng_(value){return String(value||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');}
+function fieldPeng_(row,aliases,pattern){
+ if(!row)return '';
+ const keys=Object.keys(row),pairs=keys.map(key=>({key:key,n:normalizeHeaderPeng_(key)}));
+ for(const alias of aliases||[]){const target=normalizeHeaderPeng_(alias);const hit=pairs.find(x=>x.n===target&&row[x.key]!==''&&row[x.key]!==null&&row[x.key]!==undefined);if(hit)return row[hit.key];}
+ const hit=pattern&&pairs.find(x=>pattern.test(x.n)&&row[x.key]!==''&&row[x.key]!==null&&row[x.key]!==undefined);
+ return hit?row[hit.key]:'';
+}
 function getPengusahaanDashboard(filters){
   filters=filters||{};
   const penjualan = filterPengusahaanPeriod_(read_(PENGUSAHAAN_DATA_SHEETS.penjualan), filters);
@@ -351,6 +359,12 @@ function getPengusahaanDashboard(filters){
   const tad = read_(PENGUSAHAAN_DATA_SHEETS.tad);
 
   const pLatest = latestPenjualan_(penjualan);
+  const val=(row,aliases,pattern)=>numPeng_(fieldPeng_(row,aliases,pattern));
+  const pelanggan_=row=>val(row,['JUMLAH PELANGGAN','Jumlah Pelanggan','Pelanggan'],/(jumlah pelanggan|total pelanggan|^pelanggan$)/);
+  const kwh_=row=>val(row,['PENJUALAN (KWH)','PENJUALAN KWH','Penjualan Tenaga Listrik (kWh)','Energi Terjual (kWh)'],/(penjualan.*(kwh|energi)|energi.*(terjual|kwh)|kwh terjual)/);
+  const pendapatan_=row=>val(row,['RP PENDAPATAN','Pendapatan (Rp)','Pendapatan'],/(pendapatan|revenue)/);
+  const growth_=row=>val(row,['GROWTH KWH YOY','Growth kWh YoY','Pertumbuhan kWh'],/(growth.*kwh|pertumbuhan.*kwh|yoy)/);
+  const period_=row=>fieldPeng_(row,['BULAN','Periode','Tanggal'],/(^bulan$|^periode$|^tanggal$|tahun bulan)/);
   const tarifAgg = aggregateTwoCol_(tarif,'Golongan Tarif','Jumlah Pelanggan');
   const kategoriAgg = aggregateTwoCol_(kategori,'Kategori','Jumlah Pelanggan');
   const kecAgg = aggregateTwoCol_(kec,'Kecamatan','Jumlah Pelanggan');
@@ -371,19 +385,19 @@ function getPengusahaanDashboard(filters){
     },
     latest:pLatest,
     cards:{
-      pelanggan:pLatest ? numPeng_(pLatest['JUMLAH PELANGGAN']) : 0,
+      pelanggan:pLatest ? pelanggan_(pLatest) : 0,
       daya:pLatest ? numPeng_(pLatest['DAYA TERSAMBUNG']) : 0,
-      penjualanKwh:pLatest ? numPeng_(pLatest['PENJUALAN (KWH)']) : 0,
-      pendapatan:pLatest ? numPeng_(pLatest['RP PENDAPATAN']) : 0,
-      growth:pLatest ? numPeng_(pLatest['GROWTH KWH YOY']) : 0,
+      penjualanKwh:pLatest ? kwh_(pLatest) : 0,
+      pendapatan:pLatest ? pendapatan_(pLatest) : 0,
+      growth:pLatest ? growth_(pLatest) : 0,
       natural:pLatest ? numPeng_(pLatest['NATURAL GROWTH']) : 0,
       nonNatural:pLatest ? numPeng_(pLatest['NON NATURAL GROWTH']) : 0
     },
     trends:penjualan.map(r=>({
-      bulan:r['BULAN']||'',
-      pelanggan:numPeng_(r['JUMLAH PELANGGAN']),
-      penjualan:numPeng_(r['PENJUALAN (KWH)']),
-      growth:numPeng_(r['GROWTH KWH YOY'])
+      bulan:period_(r),
+      pelanggan:pelanggan_(r),
+      penjualan:kwh_(r),
+      growth:growth_(r)
     })),
     tarif:tarifAgg,
     kategori:kategoriAgg,
