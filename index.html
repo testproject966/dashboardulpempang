@@ -214,6 +214,49 @@ table{border-collapse:separate;border-spacing:0;width:100%;border:1px solid #dce
 .k3l-module-head{align-items:flex-start!important;gap:14px}.k3l-module-head>div:nth-child(2){min-width:0;flex:1}.k3l-subnote{display:block;margin-top:7px;font-size:10px;color:#62859a;line-height:1.5}.k3l-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.k3l-data-panel .head{align-items:flex-start;gap:16px}.k3l-data-panel .head>div{min-width:0}.k3l-data-panel .head h3{margin:0 0 6px}.k3l-table-help{margin:0;color:#7795a6;font-size:10px;line-height:1.6;max-width:720px}.k3l-table-wrap{max-width:100%;overflow:auto;border:1px solid #dceaf0;border-radius:12px;overscroll-behavior-x:contain}.k3l-table{width:max-content;min-width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0}.k3l-table th,.k3l-table td{white-space:normal;overflow-wrap:anywhere;word-break:normal;vertical-align:top;line-height:1.55;padding:12px 13px;min-width:115px;max-width:280px}.k3l-table th{position:sticky;top:0;z-index:2;background:#eaf5f9;color:#225c77;font-size:10px;font-weight:800;letter-spacing:.15px;text-transform:none}.k3l-table th:nth-child(1),.k3l-table td:nth-child(1){min-width:58px;width:58px;max-width:58px;text-align:center}.k3l-table th:nth-child(2),.k3l-table td:nth-child(2){min-width:110px;width:110px;max-width:110px}.k3l-table th:nth-child(3),.k3l-table td:nth-child(3){min-width:78px;width:78px;max-width:78px}.k3l-table th:nth-child(n+4),.k3l-table td:nth-child(n+4){min-width:235px;width:235px;max-width:280px}.k3l-table td:nth-child(n+4){font-variant-numeric:tabular-nums;color:#176c8f}.k3l-table tbody tr:hover td{background:#f0fafc}.k3l-table td[title]{cursor:default}
 @media(max-width:900px){.k3l-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.k3l-module-head{flex-wrap:wrap}.k3l-module-head .actions{width:100%;display:flex;gap:8px;flex-wrap:wrap}.k3l-table th,.k3l-table td{padding:10px}.k3l-table th:nth-child(n+4),.k3l-table td:nth-child(n+4){min-width:200px;width:200px}}
 @media(max-width:520px){.k3l-kpis{grid-template-columns:1fr 1fr}.k3l-kpis .kpi{min-width:0}.k3l-kpis .val{font-size:19px}.k3l-table th:nth-child(n+4),.k3l-table td:nth-child(n+4){min-width:180px;width:180px}}
+
+/* Looker Studio inspired system-wide presentation */
+:root{--nav:#102a43;--nav2:#173f5f;--primary:#1967d2;--primary2:#0b57d0;--bg:#f1f4f8;--card:#fff;--ink:#202b3c;--muted:#64748b;--line:#dfe5ee;--green:#18845b;--yellow:#d99b17;--red:#c43f4b;--cyan:#148ca5;--shadow:0 2px 7px rgba(26,48,76,.07);--r:12px}
+body{background:#f1f4f8;color:#202b3c;font-family:Inter,"Google Sans",Roboto,"Segoe UI",Arial,sans-serif;letter-spacing:0}
+.panel,.data-panel,.pro-panel,.summary-card,.kpi,.card,.support-card{border:1px solid #dfe5ee!important;border-radius:12px!important;box-shadow:0 2px 7px rgba(26,48,76,.06)!important}
+.panel .head,.data-panel .head,.pro-panel-head{border-bottom:1px solid #e6ebf2;padding-bottom:12px}
+button,.btn,.pro-outline-btn{transition:background .15s,border-color .15s,box-shadow .15s;cursor:pointer}
+button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(26,103,210,.25);outline-offset:2px}
+.kpis{gap:12px}
+.kpi,.summary-card{background:#fff}
+.hero,.pro-welcome,.moduleHead,.k3l-module-head{background:linear-gradient(110deg,#123e67 0%,#176ca3 60%,#0799a7 100%)!important;border-radius:16px!important;box-shadow:0 8px 22px rgba(17,69,111,.12)!important}
+.pro-kpi-card{box-shadow:0 2px 7px rgba(26,48,76,.06)!important;border-color:#dfe5ee!important;border-radius:12px!important}
+.pro-kpi-card:after{opacity:.5}
+.pro-chart-track{background:#edf2f7}
+.pro-chart-track span{background:#4285f4;box-shadow:none}
+.pro-panel{box-shadow:0 2px 7px rgba(26,48,76,.05)!important}
+.data-table-wrap{max-width:100%;overflow:auto;border:1px solid #dfe5ee;border-radius:10px;background:#fff}
+.data-table-wrap table{border-collapse:separate;border-spacing:0;min-width:100%;font-variant-numeric:tabular-nums}
+.data-table-wrap th{background:#edf3f9!important;color:#38536d!important;border-bottom:1px solid #d7e0ea!important;font-size:10px!important;font-weight:700!important;letter-spacing:.1px!important;text-transform:none!important;vertical-align:bottom;white-space:normal;overflow-wrap:anywhere;line-height:1.45;padding:12px 10px!important}
+.data-table-wrap td{border-bottom:1px solid #e8edf3!important;color:#334155;vertical-align:top;line-height:1.5;padding:10px!important;white-space:normal;overflow-wrap:anywhere;max-width:320px}
+.data-table-wrap tbody tr:nth-child(even){background:#f8fafc}
+.data-table-wrap tbody tr:hover{background:#eef6ff}
+.data-table-wrap tbody tr:last-child td{border-bottom:0!important}
+.k3l-table-wrap{max-height:70vh;overflow:auto;border:1px solid #d7e3ed;border-radius:12px}
+.k3l-table{table-layout:fixed;min-width:1500px!important;width:max-content!important}
+.k3l-table th{position:sticky;top:0;z-index:2;white-space:normal!important;overflow-wrap:anywhere;word-break:normal;min-width:180px;max-width:280px;height:auto;line-height:1.5;padding:13px 11px!important}
+.k3l-table th:nth-child(-n+3),.k3l-table td:nth-child(-n+3){min-width:65px;width:75px;max-width:90px}
+.k3l-table td{min-width:180px;max-width:280px;white-space:normal!important;overflow-wrap:anywhere;word-break:normal}
+.k3l-table td:nth-child(-n+3){min-width:65px;width:75px;max-width:90px}
+.k3l-table-help,.k3l-subnote{max-width:900px;line-height:1.65}
+.pro-table-wrap .pro-table{min-width:max-content}
+.pro-table-wrap .pro-table th{position:sticky;top:0;z-index:1}
+.pro-table-wrap .pro-table td{max-width:280px;white-space:normal;overflow-wrap:anywhere}
+.pro-table .row-number{min-width:52px;width:52px;text-align:right}
+.pro-welcome{box-shadow:0 8px 22px rgba(17,69,111,.12)!important}
+.pro-section-heading h3,.pro-panel-head h3{letter-spacing:0}
+.pro-table-toolbar{background:#f7f9fc;border-color:#e0e7ef}
+.pro-table-search{border-color:#d6e0eb}
+.pro-table-search input{min-width:0}
+.pro-quality-row{box-shadow:0 2px 7px rgba(26,48,76,.04)}
+.side{box-shadow:2px 0 12px rgba(7,25,43,.1)}
+.nav button,.nav .nav-item{border-radius:9px}
+@media(max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.k3l-table-wrap{max-height:65vh}.k3l-table th,.k3l-table td{min-width:170px;max-width:220px}.k3l-table th:nth-child(-n+3),.k3l-table td:nth-child(-n+3){min-width:55px;max-width:70px}.pro-welcome{padding:18px}.data-table-wrap td{max-width:220px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -647,7 +690,10 @@ function renderBusinessSubTable(){
  if(count)count.textContent=filtered.length.toLocaleString('id-ID')+' dari '+rows.length.toLocaleString('id-ID')+' record';
  if(!filtered.length){box.innerHTML='<div class="pro-empty compact"><span>⌕</span><b>'+(rows.length?'Tidak ada hasil pencarian':'Belum ada data pada dataset ini')+'</b><small>'+(rows.length?'Coba kata kunci yang berbeda.':'Isi spreadsheet sumber, lalu tekan Refresh.')+'</small></div>';return}
  const keys=visibleDatasetKeys(filtered);
- box.innerHTML='<div class="data-table-wrap pro-table-wrap"><table class="pro-table"><thead><tr><th class="row-number">NO.</th>'+keys.map(k=>'<th>'+esc(k)+'</th>').join('')+'</tr></thead><tbody>'+filtered.map((r,i)=>'<tr><td class="row-number">'+(i+1).toLocaleString('id-ID')+'</td>'+keys.map(k=>'<td title="'+esc(r[k]??'')+'">'+esc(formatSourceCell_(r[k],k))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+ const hasNumber=keys.some(k=>/^(no|nomor|no\.)$/i.test(String(k).trim()));
+ const numberHead=hasNumber?'':'<th class="row-number">NO.</th>';
+ const numberCell=hasNumber?'':(i)=>'<td class="row-number">'+(i+1).toLocaleString('id-ID')+'</td>';
+ box.innerHTML='<div class="data-table-wrap pro-table-wrap"><table class="pro-table"><thead><tr>'+numberHead+keys.map(k=>'<th>'+esc(k)+'</th>').join('')+'</tr></thead><tbody>'+filtered.map((r,i)=>'<tr>'+(hasNumber?'':numberCell(i))+keys.map(k=>'<td title="'+esc(r[k]??'')+'">'+esc(formatSourceCell_(r[k],k))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
 }
 function renderSupportRoute(m){
  setHeroMode('module',m==='pendukung'?'PENDUKUNG':({database:'DATABASE',upload:'UPLOAD & VALIDASI',export:'EXPORT DATA',system:'STATUS SISTEM'}[m]||'PENDUKUNG'),'Pengelolaan data • BRIGHT ULP EMPANG');
