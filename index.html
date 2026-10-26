@@ -414,6 +414,29 @@ tbody tr:hover td{background:#eef5ff!important}
 .business-team-banner .symbol{width:64px;height:64px;flex:0 0 64px;display:grid;place-items:center;border-radius:14px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);font-size:30px}
 @media(max-width:720px){.business-team-banner{padding:16px;min-height:105px}.business-team-banner h3{font-size:17px}.business-team-banner .symbol{width:48px;height:48px;flex-basis:48px;font-size:24px}}
 
+
+/* ===== Executive operational pulse by department ===== */
+.bright-ops-section{margin:18px 0 22px}
+.bright-ops-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:0 0 12px}
+.bright-ops-heading h3{margin:4px 0 5px;color:#202124;font-size:18px}
+.bright-ops-heading p{margin:0;color:#68778b;font-size:11px;line-height:1.6}
+.bright-ops-legend{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:9px;color:#68778b}
+.bright-ops-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:6px}
+.bright-ops-legend .good{background:#188038}.bright-ops-legend .warn{background:#f9ab00}.bright-ops-legend .risk{background:#d93025}
+.bright-ops-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.bright-ops-card{min-width:0;background:#fff;border:1px solid #e0e5ec;border-radius:12px;padding:15px;box-shadow:0 1px 3px rgba(60,64,67,.08)}
+.bright-ops-top{display:flex;justify-content:space-between;align-items:center;gap:7px}
+.bright-ops-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:#e8f0fe;font-size:17px}
+.bright-ops-status{font-size:8px;font-weight:800;letter-spacing:.3px;padding:5px 7px;border-radius:20px;white-space:nowrap}
+.bright-ops-status.good{background:#e6f4ea;color:#137333}.bright-ops-status.warn{background:#fef7e0;color:#9a6700}.bright-ops-status.risk{background:#fce8e6;color:#b3261e}
+.bright-ops-card h4{margin:12px 0 8px;font-size:12px;color:#3c4043}
+.bright-ops-metric{display:flex;align-items:baseline;gap:6px}.bright-ops-metric strong{font-size:25px;color:#202124;letter-spacing:-.5px}.bright-ops-metric span{font-size:10px;color:#68778b}
+.bright-ops-track{height:6px;background:#edf1f5;border-radius:99px;overflow:hidden;margin:10px 0}
+.bright-ops-track span{display:block;height:100%;border-radius:99px}.bright-ops-track .good{background:#188038}.bright-ops-track .warn{background:#f9ab00}.bright-ops-track .risk{background:#d93025}
+.bright-ops-foot{display:flex;justify-content:space-between;gap:6px;font-size:9px;color:#68778b}
+@media(max-width:980px){.bright-ops-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.bright-ops-heading{align-items:flex-start;flex-direction:column}.bright-ops-grid{grid-template-columns:1fr}.bright-ops-legend{flex-wrap:wrap}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -837,6 +860,9 @@ function businessHomeRender(x){
  const sales=sheets.penjualan||[];
  const salesPreview=sales.length?'<div class="data-table-wrap pro-table-wrap"><table class="pro-table"><thead><tr>'+Object.keys(sales[0]).slice(0,6).map(k=>'<th>'+esc(k)+'</th>').join('')+'</tr></thead><tbody>'+sales.slice(0,5).map(r=>'<tr>'+Object.keys(sales[0]).slice(0,6).map(k=>'<td>'+esc(formatSourceCell_(r[k],k))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><div class="pro-panel-foot"><span>Menampilkan 5 record pertama dari '+fmt(sales.length)+' record.</span><button class="pro-link-btn" onclick="module(\'penjualan\')">Lihat seluruh data →</button></div>':'<div class="pro-empty compact"><span>▤</span><b>Belum ada data penjualan untuk ditampilkan</b><small>Pastikan sheet Penjualan terisi dan API telah terhubung.</small></div>';
  const period=(x.latest&&x.latest.BULAN)||'Periode terbaru';
+ const opsSummary=(D&&D.summary)||{};
+ const opsDefs=[['teknik','Teknik Jaringan','🔧'],['transaksi','Transaksi Energi','⚡'],['pelayanan','Pelayanan Pelanggan','👥'],['k3l','K3L','🦺']];
+ const opsCards='<div class="bright-ops-grid">'+opsDefs.map(d=>{const q=opsSummary[d[0]]||{};const rate=Math.max(0,Math.min(100,Number(q.rate)||0));const tone=rate>=80?'good':rate>=50?'warn':'risk';const status=rate>=80?'BAIK':rate>=50?'PERLU PANTAU':'PERLU TINDAK LANJUT';return '<article class="bright-ops-card"><div class="bright-ops-top"><span class="bright-ops-icon">'+d[2]+'</span><span class="bright-ops-status '+tone+'">'+status+'</span></div><h4>'+d[1]+'</h4><div class="bright-ops-metric"><strong>'+rate.toLocaleString('id-ID',{maximumFractionDigits:1})+'%</strong><span>penyelesaian</span></div><div class="bright-ops-track"><span class="'+tone+'" style="width:'+rate+'%"></span></div><div class="bright-ops-foot"><span>'+fmt(q.selesai||0)+' selesai</span><span>'+fmt(q.total||0)+' total</span></div></article>';}).join('')+'</div>';
  content.innerHTML=
  '<div class="pro-welcome"><div><div class="pro-eyebrow">EXECUTIVE OVERVIEW / PLN UP3 SUMBAWA</div><h2>Ringkasan Pengusahaan</h2><p>Ikhtisar pelanggan, penjualan energi, pendapatan, dan kesiapan dataset unit dalam satu tampilan.</p></div><div class="pro-period"><small>PERIODE DATA</small><strong>'+esc(period)+'</strong><span><i class="pro-live-dot"></i> Sinkronisasi Spreadsheet</span></div></div>'+
  '<div class="pro-kpi-grid">'+
@@ -845,6 +871,7 @@ function businessHomeRender(x){
  '<div class="pro-kpi-card"><div class="pro-kpi-top"><span class="pro-kpi-icon green">Rp</span><span class="pro-kpi-caption">PENDAPATAN</span></div><strong class="money-value">'+money(c.pendapatan)+'</strong><small>Pendapatan pada periode terbaru</small><div class="pro-kpi-bottom"><span class="pro-kpi-line green-line"></span><span>Nilai dalam rupiah</span></div></div>'+
  '<div class="pro-kpi-card"><div class="pro-kpi-top"><span class="pro-kpi-icon gold">↗</span><span class="pro-kpi-caption">PERTUMBUHAN KWH</span></div><strong>'+pct(c.growth)+'</strong><small>Growth year-on-year sesuai sumber data</small><div class="pro-kpi-bottom"><span class="pro-kpi-line gold-line"></span><span>Indikator pertumbuhan</span></div></div>'+
  '</div>'+
+ '<div class="bright-ops-section"><div class="bright-ops-heading"><div><span class="pro-section-kicker">OPERATIONAL PULSE</span><h3>Status Kinerja per Bidang</h3><p>Ringkasan penyelesaian berdasarkan data operasional yang tersedia. Indikator warna membantu menentukan prioritas tindak lanjut.</p></div><span class="bright-ops-legend"><i class="good"></i> ≥80% <i class="warn"></i> 50–79% <i class="risk"></i> &lt;50%</span></div>'+opsCards+'</div>'+
  '<div class="pro-section-heading"><div><span class="pro-section-kicker">MONITORING & ANALISIS</span><h3>Ikhtisar Kinerja Pengusahaan</h3><p>Angka dan komposisi berikut berasal dari dataset yang dikembalikan API.</p></div><span class="pro-section-badge">LIVE DATA</span></div>'+
  '<div class="pro-analytics-grid"><section class="pro-panel"><div class="pro-panel-head"><div><span class="pro-panel-icon">▥</span><div><h3>Tren Penjualan kWh</h3><p>Pergerakan penjualan berdasarkan periode yang tersedia</p></div></div><button class="pro-link-btn" onclick="module(\'penjualan\')">Detail →</button></div>'+chart+'</section>'+
  '<section class="pro-panel"><div class="pro-panel-head"><div><span class="pro-panel-icon purple">▦</span><div><h3>Kesiapan Dataset</h3><p>Ringkasan ketersediaan data sumber</p></div></div><span class="pro-total-pill">'+ready+' / '+ds.length+' sumber</span></div><div class="pro-dataset-summary"><div><small>DATASET TERSEDIA</small><strong>'+ready+'</strong><span>sheet terdeteksi tersedia</span></div><div><small>TOTAL RECORD</small><strong>'+fmt(totalRecords)+'</strong><span>record dari 7 kategori</span></div></div><div class="pro-completeness"><div class="pro-completeness-head"><span>Ketersediaan sumber</span><b>'+Math.round(ready/ds.length*100)+'%</b></div><div class="pro-completeness-track"><span style="width:'+Math.round(ready/ds.length*100)+'%"></span></div></div><div class="pro-mini-list">'+ds.map(d=>'<div><span class="pro-mini-status '+(available[d.key]?'ok':'warn')+'"></span><span>'+d.label+'</span><b>'+fmt((sheets[d.key]||[]).length)+'</b></div>').join('')+'</div></section></div>'+
