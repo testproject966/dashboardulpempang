@@ -868,7 +868,6 @@ function businessHomeRender(x){
  const opsSummary=(D&&D.summary)||{};
  const opsDefs=[['teknik','Teknik Jaringan','🔧'],['transaksi','Transaksi Energi','⚡'],['pelayanan','Pelayanan Pelanggan','👥'],['k3l','K3L','🦺']];
  const opsCards='<div class="bright-ops-grid">'+opsDefs.map(d=>{const q=opsSummary[d[0]]||{};const rate=Math.max(0,Math.min(100,Number(q.rate)||0));const tone=rate>=80?'good':rate>=50?'warn':'risk';const status=rate>=80?'BAIK':rate>=50?'PERLU PANTAU':'PERLU TINDAK LANJUT';return '<article class="bright-ops-card" data-ops="'+d[0]+'"><div class="bright-ops-top"><span class="bright-ops-icon">'+d[2]+'</span><span class="bright-ops-status '+tone+'">'+status+'</span></div><h4>'+d[1]+'</h4><div class="bright-ops-metric"><strong>'+rate.toLocaleString('id-ID',{maximumFractionDigits:1})+'%</strong><span>penyelesaian</span></div><div class="bright-ops-track"><span class="'+tone+'" style="width:'+rate+'%"></span></div><div class="bright-ops-foot"><span>'+fmt(q.selesai||0)+' selesai</span><span>'+fmt(q.total||0)+' total</span></div></article>';}).join('')+'</div>';
- refreshOperationalPulse();
  content.innerHTML=
  '<div class="pro-welcome"><div><div class="pro-eyebrow">EXECUTIVE OVERVIEW / PLN UP3 SUMBAWA</div><h2>Ringkasan Pengusahaan</h2><p>Ikhtisar pelanggan, penjualan energi, pendapatan, dan kesiapan dataset unit dalam satu tampilan.</p></div><div class="pro-period"><small>PERIODE DATA</small><strong>'+esc(period)+'</strong><span><i class="pro-live-dot"></i> Sinkronisasi Spreadsheet</span></div></div>'+
  '<div class="pro-kpi-grid">'+
@@ -885,6 +884,7 @@ function businessHomeRender(x){
  '<section class="pro-panel pro-dataset-panel"><div class="pro-dataset-list">'+datasetCards+'</div><div class="pro-note"><span>ⓘ</span><p><b>Catatan data:</b> jumlah record menunjukkan data yang dikembalikan API saat ini. Jika sumber bertanda “Periksa”, verifikasi nama sheet, isi spreadsheet, dan akses Web App Apps Script.</p></div></section>'+
  '<section class="pro-panel pro-sales-preview"><div class="pro-panel-head"><div><span class="pro-panel-icon">▤</span><div><h3>Pratinjau Data Penjualan</h3><p>Cuplikan record dari sumber data penjualan</p></div></div><button class="pro-link-btn" onclick="module(\'penjualan\')">Buka tabel lengkap →</button></div>'+salesPreview+'</section>'+
  '<div class="pro-footer-note"><span>BRIGHT ULP EMPANG</span><span>Data operasional • PLN ULP Empang / PLN UP3 Sumbawa</span><span>Periode: '+esc(period)+'</span></div>';
+ refreshOperationalPulse();
 }
 
 async function refreshOperationalPulse(){
